@@ -1,0 +1,156 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+    getFirestore,
+    collection,
+    addDoc,
+    onSnapshot,
+    deleteDoc,
+    doc,
+    updateDoc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyDmOGNtpssOPd9752gHWRR2c4QJN28CEc8",
+    authDomain: "money-callection.firebaseapp.com",
+    projectId: "money-callection",
+    storageBucket: "money-callection.firebasestorage.app",
+    messagingSenderId: "741567569972",
+    appId: "1:741567569972:web:193d6f62b3528a095daa61",
+    measurementId: "G-DRF9SCD90B"
+};
+
+// Firebase Initialize
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// Add Data
+window.addData = async function () {
+
+    const name = document.getElementById("name").value;
+    const amount = document.getElementById("amount").value;
+    const date = document.getElementById("date").value;
+
+    if (!name || !amount || !date) {
+        alert("সব তথ্য দিন");
+        return;
+    }
+
+    try {
+
+        await addDoc(collection(db, "moneyList"), {
+            name: name,
+            amount: Number(amount),
+            date: date
+        });
+
+        // Clear Input
+        document.getElementById("name").value = "";
+        document.getElementById("amount").value = "";
+        document.getElementById("date").value = "";
+
+        alert("ডাটা যোগ হয়েছে");
+
+    } catch (error) {
+
+        console.log(error);
+        alert("ডাটা যোগ হয়নি");
+    }
+};
+
+// Delete Data
+window.deleteData = async function (id) {
+
+    const confirmDelete = confirm("ডিলিট করতে চান?");
+
+    if (confirmDelete) {
+
+        try {
+
+            await deleteDoc(doc(db, "moneyList", id));
+
+            alert("ডাটা ডিলিট হয়েছে");
+
+        } catch (error) {
+
+            console.log(error);
+            alert("ডিলিট হয়নি");
+        }
+    }
+};
+
+// Edit Data
+window.editData = async function (id, oldName, oldAmount, oldDate) {
+
+    const newName = prompt("নতুন নাম লিখুন", oldName);
+    const newAmount = prompt("নতুন টাকার পরিমাণ লিখুন", oldAmount);
+    const newDate = prompt("নতুন তারিখ লিখুন", oldDate);
+
+    if (!newName || !newAmount || !newDate) {
+        alert("সব তথ্য দিতে হবে");
+        return;
+    }
+
+    try {
+
+        await updateDoc(doc(db, "moneyList", id), {
+            name: newName,
+            amount: Number(newAmount),
+            date: newDate
+        });
+
+        alert("ডাটা আপডেট হয়েছে");
+
+    } catch (error) {
+
+        console.log(error);
+        alert("আপডেট হয়নি");
+    }
+};
+
+// Show Data Realtime
+const list = document.getElementById("list");
+const total = document.getElementById("total");
+
+onSnapshot(collection(db, "moneyList"), (snapshot) => {
+
+    list.innerHTML = "";
+
+    let totalMoney = 0;
+
+    snapshot.forEach((item) => {
+
+        const data = item.data();
+        const id = item.id;
+
+        totalMoney += Number(data.amount);
+
+        list.innerHTML += `
+        <tr>
+            <td>${data.name}</td>
+
+            <td>৳ ${data.amount}</td>
+
+            <td>${data.date}</td>
+
+            <td>
+
+                <button
+                    style="background:orange;color:white;padding:7px 12px;border:none;border-radius:5px;cursor:pointer;"
+                    onclick="editData('${id}', '${data.name}', '${data.amount}', '${data.date}')">
+                    Edit
+                </button>
+
+                <button
+                    style="background:red;color:white;padding:7px 12px;border:none;border-radius:5px;cursor:pointer;margin-left:5px;"
+                    onclick="deleteData('${id}')">
+                    Delete
+                </button>
+
+            </td>
+        </tr>
+        `;
+    });
+
+    total.innerText = totalMoney;
+});
