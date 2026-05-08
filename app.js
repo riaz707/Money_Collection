@@ -25,29 +25,55 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Admin Password
+// ======================
+// ADMIN PASSWORD SYSTEM
+// ======================
+
 const adminPassword = "181058";
 
-// Admin Check
 let isAdmin = false;
 
 const password = prompt("Admin password দিন");
 
 if (password === adminPassword) {
+
     isAdmin = true;
     alert("Admin Mode চালু হয়েছে");
+
 } else {
+
     alert("View Mode চালু হয়েছে");
 }
 
-// Add Data
+// ======================
+// HIDE FORM FOR USER
+// ======================
+
+if (!isAdmin) {
+
+    document.getElementById("formBox").style.display = "none";
+}
+
+// ======================
+// ADD DATA
+// ======================
+
 window.addData = async function () {
+
+    // Admin Check
+    if (!isAdmin) {
+
+        alert("শুধু Admin ডাটা যোগ করতে পারবে");
+        return;
+    }
 
     const name = document.getElementById("name").value;
     const amount = document.getElementById("amount").value;
     const date = document.getElementById("date").value;
 
+    // Validation
     if (!name || !amount || !date) {
+
         alert("সব তথ্য দিন");
         return;
     }
@@ -55,6 +81,7 @@ window.addData = async function () {
     try {
 
         await addDoc(collection(db, "moneyList"), {
+
             name: name,
             amount: Number(amount),
             date: date
@@ -74,10 +101,15 @@ window.addData = async function () {
     }
 };
 
-// Delete Data
+// ======================
+// DELETE DATA
+// ======================
+
 window.deleteData = async function (id) {
 
+    // Admin Check
     if (!isAdmin) {
+
         alert("শুধু Admin ডিলিট করতে পারবে");
         return;
     }
@@ -100,10 +132,15 @@ window.deleteData = async function (id) {
     }
 };
 
-// Edit Data
+// ======================
+// EDIT DATA
+// ======================
+
 window.editData = async function (id, oldName, oldAmount, oldDate) {
 
+    // Admin Check
     if (!isAdmin) {
+
         alert("শুধু Admin Edit করতে পারবে");
         return;
     }
@@ -112,7 +149,9 @@ window.editData = async function (id, oldName, oldAmount, oldDate) {
     const newAmount = prompt("নতুন টাকার পরিমাণ লিখুন", oldAmount);
     const newDate = prompt("নতুন তারিখ লিখুন", oldDate);
 
+    // Validation
     if (!newName || !newAmount || !newDate) {
+
         alert("সব তথ্য দিতে হবে");
         return;
     }
@@ -120,6 +159,7 @@ window.editData = async function (id, oldName, oldAmount, oldDate) {
     try {
 
         await updateDoc(doc(db, "moneyList", id), {
+
             name: newName,
             amount: Number(newAmount),
             date: newDate
@@ -134,7 +174,10 @@ window.editData = async function (id, oldName, oldAmount, oldDate) {
     }
 };
 
-// Show Data Realtime
+// ======================
+// SHOW DATA REALTIME
+// ======================
+
 const list = document.getElementById("list");
 const total = document.getElementById("total");
 
@@ -152,6 +195,7 @@ onSnapshot(collection(db, "moneyList"), (snapshot) => {
         totalMoney += Number(data.amount);
 
         list.innerHTML += `
+        
         <tr>
 
             <td>${data.name}</td>
@@ -193,7 +237,9 @@ onSnapshot(collection(db, "moneyList"), (snapshot) => {
 
             ` : `
 
-                <span style="color:gray;">Only View</span>
+                <span style="color:gray;">
+                    Only View
+                </span>
 
             `}
 
@@ -203,5 +249,6 @@ onSnapshot(collection(db, "moneyList"), (snapshot) => {
         `;
     });
 
+    // Total Money
     total.innerText = totalMoney;
 });
