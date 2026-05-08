@@ -32,7 +32,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 // ADMIN PASSWORD
-const adminPassword = "12345";
+const adminPassword = "181058";
 
 // ADMIN CHECK
 let isAdmin = false;
