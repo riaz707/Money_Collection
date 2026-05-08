@@ -10,115 +10,116 @@ import {
     updateDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// ======================
 // FIREBASE CONFIG
-// ======================
-
 const firebaseConfig = {
-    apiKey: "AIzaSyDmOGNtpssOPd9752gHWRR2c4QJN28CEc8",
-    authDomain: "money-callection.firebaseapp.com",
-    projectId: "money-callection",
-    storageBucket: "money-callection.firebasestorage.app",
-    messagingSenderId: "741567569972",
-    appId: "1:741567569972:web:193d6f62b3528a095daa61",
-    measurementId: "G-DRF9SCD90B"
+
+    apiKey: "YOUR_API_KEY",
+
+    authDomain: "YOUR_AUTH_DOMAIN",
+
+    projectId: "YOUR_PROJECT_ID",
+
+    storageBucket: "YOUR_STORAGE_BUCKET",
+
+    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+
+    appId: "YOUR_APP_ID"
 };
 
-// ======================
 // FIREBASE INITIALIZE
-// ======================
-
 const app = initializeApp(firebaseConfig);
+
 const db = getFirestore(app);
 
-// ======================
-// ADMIN SYSTEM
-// ======================
+// ADMIN PASSWORD
+const adminPassword = "12345";
 
-const adminPassword = "181058";
-
+// ADMIN CHECK
 let isAdmin = false;
 
-const password = prompt("Admin password দিন");
-
-if (password === adminPassword) {
-
-    isAdmin = true;
-    alert("Admin Mode চালু হয়েছে");
-
-} else {
-
-    alert("View Mode চালু হয়েছে");
-}
-
-// ======================
-// HIDE FORM FOR USER
-// ======================
-
+// ELEMENTS
 const formBox = document.getElementById("formBox");
 
-if (formBox && !isAdmin) {
+const viewAdminBox = document.getElementById("viewAdminBox");
 
-    formBox.style.display = "none";
+const adminBtn = document.getElementById("adminBtn");
+
+const adminBtn2 = document.getElementById("adminBtn2");
+
+// LOGIN FUNCTION
+function adminLogin() {
+
+    const password = prompt("Admin Password দিন");
+
+    if (password === adminPassword) {
+
+        isAdmin = true;
+
+        alert("Admin Mode চালু হয়েছে");
+
+        formBox.style.display = "block";
+
+        viewAdminBox.style.display = "none";
+
+        loadData();
+
+    } else {
+
+        alert("ভুল Password");
+    }
 }
 
-// ======================
-// ADD DATA
-// ======================
+// BUTTON CLICK
+adminBtn.addEventListener("click", adminLogin);
 
+adminBtn2.addEventListener("click", adminLogin);
+
+// ADD DATA
 window.addData = async function () {
 
-    // Admin Check
     if (!isAdmin) {
 
         alert("শুধু Admin ডাটা যোগ করতে পারবে");
+
         return;
     }
 
     const name = document.getElementById("name").value;
+
     const amount = document.getElementById("amount").value;
+
     const date = document.getElementById("date").value;
 
-    // Validation
     if (!name || !amount || !date) {
 
         alert("সব তথ্য দিন");
+
         return;
     }
 
-    try {
+    await addDoc(collection(db, "moneyList"), {
 
-        await addDoc(collection(db, "moneyList"), {
+        name: name,
 
-            name: name,
-            amount: Number(amount),
-            date: date
-        });
+        amount: Number(amount),
 
-        // Clear Inputs
-        document.getElementById("name").value = "";
-        document.getElementById("amount").value = "";
-        document.getElementById("date").value = "";
+        date: date
+    });
 
-        alert("ডাটা যোগ হয়েছে");
+    document.getElementById("name").value = "";
 
-    } catch (error) {
+    document.getElementById("amount").value = "";
 
-        console.log(error);
-        alert("ডাটা যোগ হয়নি");
-    }
+    document.getElementById("date").value = "";
 };
 
-// ======================
 // DELETE DATA
-// ======================
-
 window.deleteData = async function (id) {
 
-    // Admin Check
     if (!isAdmin) {
 
         alert("শুধু Admin ডিলিট করতে পারবে");
+
         return;
     }
 
@@ -126,137 +127,107 @@ window.deleteData = async function (id) {
 
     if (confirmDelete) {
 
-        try {
-
-            await deleteDoc(doc(db, "moneyList", id));
-
-            alert("ডাটা ডিলিট হয়েছে");
-
-        } catch (error) {
-
-            console.log(error);
-            alert("ডিলিট হয়নি");
-        }
+        await deleteDoc(doc(db, "moneyList", id));
     }
 };
 
-// ======================
 // EDIT DATA
-// ======================
-
 window.editData = async function (id, oldName, oldAmount, oldDate) {
 
-    // Admin Check
     if (!isAdmin) {
 
         alert("শুধু Admin Edit করতে পারবে");
+
         return;
     }
 
     const newName = prompt("নতুন নাম লিখুন", oldName);
+
     const newAmount = prompt("নতুন টাকার পরিমাণ লিখুন", oldAmount);
+
     const newDate = prompt("নতুন তারিখ লিখুন", oldDate);
 
-    // Validation
     if (!newName || !newAmount || !newDate) {
 
-        alert("সব তথ্য দিতে হবে");
+        alert("সব তথ্য দিন");
+
         return;
     }
 
-    try {
+    await updateDoc(doc(db, "moneyList", id), {
 
-        await updateDoc(doc(db, "moneyList", id), {
+        name: newName,
 
-            name: newName,
-            amount: Number(newAmount),
-            date: newDate
-        });
+        amount: Number(newAmount),
 
-        alert("ডাটা আপডেট হয়েছে");
-
-    } catch (error) {
-
-        console.log(error);
-        alert("আপডেট হয়নি");
-    }
+        date: newDate
+    });
 };
 
-// ======================
-// SHOW DATA REALTIME
-// ======================
-
+// REALTIME DATA
 const list = document.getElementById("list");
+
 const total = document.getElementById("total");
 
-onSnapshot(collection(db, "moneyList"), (snapshot) => {
+function loadData() {
 
-    list.innerHTML = "";
+    onSnapshot(collection(db, "moneyList"), (snapshot) => {
 
-    let totalMoney = 0;
+        list.innerHTML = "";
 
-    snapshot.forEach((item) => {
+        let totalMoney = 0;
 
-        const data = item.data();
-        const id = item.id;
+        snapshot.forEach((item) => {
 
-        totalMoney += Number(data.amount);
+            const data = item.data();
 
-        list.innerHTML += `
+            const id = item.id;
 
-        <tr>
+            totalMoney += Number(data.amount);
 
-            <td>${data.name}</td>
+            list.innerHTML += `
 
-            <td>৳ ${data.amount}</td>
+            <tr>
 
-            <td>${data.date}</td>
+                <td>${data.name}</td>
 
-            <td>
+                <td>৳ ${data.amount}</td>
 
-                ${isAdmin ? `
+                <td>${data.date}</td>
 
-                    <button
-                        style="
-                            background:orange;
-                            color:white;
-                            padding:7px 12px;
-                            border:none;
-                            border-radius:5px;
-                            cursor:pointer;
-                        "
-                        onclick="editData('${id}', '${data.name}', '${data.amount}', '${data.date}')">
-                        Edit
-                    </button>
+                <td>
 
-                    <button
-                        style="
-                            background:red;
-                            color:white;
-                            padding:7px 12px;
-                            border:none;
-                            border-radius:5px;
-                            cursor:pointer;
-                            margin-left:5px;
-                        "
-                        onclick="deleteData('${id}')">
-                        Delete
-                    </button>
+                    ${isAdmin ? `
 
-                ` : `
+                        <button
+                            class="edit-btn"
+                            onclick="editData('${id}', '${data.name}', '${data.amount}', '${data.date}')">
+                            Edit
+                        </button>
 
-                    <span style="color:gray;">
-                        Only View
-                    </span>
+                        <button
+                            class="delete-btn"
+                            onclick="deleteData('${id}')">
+                            Delete
+                        </button>
 
-                `}
+                    ` : `
 
-            </td>
+                        <span class="view-text">
+                            Only View
+                        </span>
 
-        </tr>
-        `;
+                    `}
+
+                </td>
+
+            </tr>
+            `;
+        });
+
+        total.innerText = totalMoney;
     });
+}
 
-    // TOTAL MONEY
-    total.innerText = totalMoney;
-});
+// DEFAULT VIEW MODE
+loadData();

@@ -1,101 +1,224 @@
 <!DOCTYPE html>
-<title>টাকা তোলার লিস্ট</title>
+<html lang="bn">
 
-<style>
-    body {
-        font-family: sans-serif;
-        background: #f5f5f5;
-        padding: 20px;
-    }
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    .box {
-        background: white;
-        padding: 20px;
-        border-radius: 10px;
-        max-width: 800px;
-        margin: auto;
-    }
+    <title>টাকা তোলার লিস্ট</title>
 
-    input {
-        width: 100%;
-        padding: 10px;
-        margin-top: 10px;
-    }
+    <style>
+        body {
+            font-family: sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
 
-    button {
-        padding: 8px 15px;
-        margin-top: 10px;
-        border: none;
-        cursor: pointer;
-        color: white;
-        border-radius: 5px;
-    }
+        .box {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            max-width: 850px;
+            margin: auto;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
 
-    .add-btn {
-        background: green;
-    }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
 
-    .edit-btn {
-        background: orange;
-    }
+        #formBox input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            box-sizing: border-box;
+        }
 
-    .delete-btn {
-        background: red;
-    }
+        .button-area {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
 
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 20px;
-    }
+        .button-area button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 15px;
+        }
 
-    table th,
-    table td {
-        border: 1px solid #ddd;
-        padding: 10px;
-        text-align: left;
-    }
+        .add-btn {
+            background: green;
+        }
 
-    h2 {
-        text-align: center;
-    }
+        .admin-btn {
+            background: black;
+        }
 
-    .total {
-        margin-top: 20px;
-        font-size: 22px;
-        font-weight: bold;
-        color: green;
-    }
-</style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 25px;
+        }
+
+        table th,
+        table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+
+        table th {
+            background: #f0f0f0;
+        }
+
+        .total {
+            margin-top: 20px;
+            font-size: 22px;
+            font-weight: bold;
+            color: green;
+            text-align: center;
+        }
+
+        .edit-btn {
+            background: orange;
+            color: white;
+            border: none;
+            padding: 7px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .delete-btn {
+            background: red;
+            color: white;
+            border: none;
+            padding: 7px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+
+        .footer {
+            margin-top: 35px;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+            text-align: center;
+            line-height: 30px;
+        }
+
+        .footer-number {
+            font-size: 22px;
+            font-weight: bold;
+            color: #111;
+        }
+
+        .footer-method {
+            color: green;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .footer-note {
+            color: gray;
+            font-size: 15px;
+        }
+
+        .view-text {
+            color: gray;
+            font-size: 14px;
+        }
+    </style>
 </head>
 
 <body>
 
     <div class="box">
 
-        <h2>ইয়ানত এর টাকা</h2>
+        <h2>টাকা তোলার লিস্ট</h2>
 
-        <input type="text" id="name" placeholder="নাম">
-        <input type="number" id="amount" placeholder="টাকার পরিমাণ">
-        <input type="date" id="date">
+        <!-- ADMIN FORM -->
+        <div id="formBox" style="display: none;">
 
-        <button class="add-btn" onclick="addData()">যোগ করুন</button>
+            <input type="text" id="name" placeholder="নাম">
 
+            <input type="number" id="amount" placeholder="টাকার পরিমাণ">
+
+            <input type="date" id="date">
+
+            <div class="button-area">
+
+                <button class="add-btn" onclick="addData()">
+                    যোগ করুন
+                </button>
+
+                <button class="admin-btn" id="adminBtn">
+                    Admin
+                </button>
+
+            </div>
+
+        </div>
+
+        <!-- USER MODE ADMIN BUTTON -->
+        <div id="viewAdminBox" class="button-area">
+
+            <button class="admin-btn" id="adminBtn2">
+                Admin Login
+            </button>
+
+        </div>
+
+        <!-- TABLE -->
         <table>
+
             <thead>
+
                 <tr>
                     <th>নাম</th>
                     <th>টাকা</th>
                     <th>তারিখ</th>
                     <th>অ্যাকশন</th>
                 </tr>
+
             </thead>
 
             <tbody id="list"></tbody>
+
         </table>
 
+        <!-- TOTAL -->
         <div class="total">
             মোট টাকা: ৳ <span id="total">0</span>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+
+            <div style="font-size:18px;font-weight:bold;">
+                পেমেন্ট করুন
+            </div>
+
+            <div class="footer-number">
+                📱 01893454283
+            </div>
+
+            <div class="footer-method">
+                বিকাশ / নগদ / রকেট
+            </div>
+
+            <div class="footer-note">
+                (পার্সোনাল নাম্বার)
+            </div>
+
+            <div style="margin-top:10px;color:#999;font-size:14px;">
+                টাকা পাঠানোর পর Admin কে জানিয়ে দিন
+            </div>
+
         </div>
 
     </div>
