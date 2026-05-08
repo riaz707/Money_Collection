@@ -10,6 +10,7 @@ import {
     updateDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+// Firebase Config
 const firebaseConfig = {
     apiKey: "AIzaSyDmOGNtpssOPd9752gHWRR2c4QJN28CEc8",
     authDomain: "money-callection.firebaseapp.com",
@@ -23,6 +24,21 @@ const firebaseConfig = {
 // Firebase Initialize
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+
+// Admin Password
+const adminPassword = "181058";
+
+// Admin Check
+let isAdmin = false;
+
+const password = prompt("Admin password দিন");
+
+if (password === adminPassword) {
+    isAdmin = true;
+    alert("Admin Mode চালু হয়েছে");
+} else {
+    alert("View Mode চালু হয়েছে");
+}
 
 // Add Data
 window.addData = async function () {
@@ -44,7 +60,7 @@ window.addData = async function () {
             date: date
         });
 
-        // Clear Input
+        // Clear Inputs
         document.getElementById("name").value = "";
         document.getElementById("amount").value = "";
         document.getElementById("date").value = "";
@@ -60,6 +76,11 @@ window.addData = async function () {
 
 // Delete Data
 window.deleteData = async function (id) {
+
+    if (!isAdmin) {
+        alert("শুধু Admin ডিলিট করতে পারবে");
+        return;
+    }
 
     const confirmDelete = confirm("ডিলিট করতে চান?");
 
@@ -81,6 +102,11 @@ window.deleteData = async function (id) {
 
 // Edit Data
 window.editData = async function (id, oldName, oldAmount, oldDate) {
+
+    if (!isAdmin) {
+        alert("শুধু Admin Edit করতে পারবে");
+        return;
+    }
 
     const newName = prompt("নতুন নাম লিখুন", oldName);
     const newAmount = prompt("নতুন টাকার পরিমাণ লিখুন", oldAmount);
@@ -127,6 +153,7 @@ onSnapshot(collection(db, "moneyList"), (snapshot) => {
 
         list.innerHTML += `
         <tr>
+
             <td>${data.name}</td>
 
             <td>৳ ${data.amount}</td>
@@ -135,19 +162,43 @@ onSnapshot(collection(db, "moneyList"), (snapshot) => {
 
             <td>
 
+            ${isAdmin ? `
+
                 <button
-                    style="background:orange;color:white;padding:7px 12px;border:none;border-radius:5px;cursor:pointer;"
+                    style="
+                        background:orange;
+                        color:white;
+                        padding:7px 12px;
+                        border:none;
+                        border-radius:5px;
+                        cursor:pointer;
+                    "
                     onclick="editData('${id}', '${data.name}', '${data.amount}', '${data.date}')">
                     Edit
                 </button>
 
                 <button
-                    style="background:red;color:white;padding:7px 12px;border:none;border-radius:5px;cursor:pointer;margin-left:5px;"
+                    style="
+                        background:red;
+                        color:white;
+                        padding:7px 12px;
+                        border:none;
+                        border-radius:5px;
+                        cursor:pointer;
+                        margin-left:5px;
+                    "
                     onclick="deleteData('${id}')">
                     Delete
                 </button>
 
+            ` : `
+
+                <span style="color:gray;">Only View</span>
+
+            `}
+
             </td>
+
         </tr>
         `;
     });
