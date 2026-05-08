@@ -13,20 +13,22 @@ import {
 // FIREBASE CONFIG
 const firebaseConfig = {
 
-    apiKey: "YOUR_API_KEY",
+    apiKey: "AIzaSyDmOGNtpssOPd9752gHWRR2c4QJN28CEc8",
 
-    authDomain: "YOUR_AUTH_DOMAIN",
+    authDomain: "money-callection.firebaseapp.com",
 
-    projectId: "YOUR_PROJECT_ID",
+    projectId: "money-callection",
 
-    storageBucket: "YOUR_STORAGE_BUCKET",
+    storageBucket: "money-callection.firebasestorage.app",
 
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+    messagingSenderId: "741567569972",
 
-    appId: "YOUR_APP_ID"
+    appId: "1:741567569972:web:193d6f62b3528a095daa61",
+
+    measurementId: "G-DRF9SCD90B"
 };
 
-// FIREBASE INITIALIZE
+// FIREBASE INIT
 const app = initializeApp(firebaseConfig);
 
 const db = getFirestore(app);
@@ -34,19 +36,22 @@ const db = getFirestore(app);
 // ADMIN PASSWORD
 const adminPassword = "181058";
 
-// ADMIN CHECK
 let isAdmin = false;
 
 // ELEMENTS
 const formBox = document.getElementById("formBox");
 
-const viewAdminBox = document.getElementById("viewAdminBox");
+const viewMode = document.getElementById("viewMode");
 
 const adminBtn = document.getElementById("adminBtn");
 
 const adminBtn2 = document.getElementById("adminBtn2");
 
-// LOGIN FUNCTION
+const incomeList = document.getElementById("incomeList");
+
+const expenseList = document.getElementById("expenseList");
+
+// ADMIN LOGIN
 function adminLogin() {
 
     const password = prompt("Admin Password দিন");
@@ -55,11 +60,11 @@ function adminLogin() {
 
         isAdmin = true;
 
-        alert("Admin Mode চালু হয়েছে");
-
         formBox.style.display = "block";
 
-        viewAdminBox.style.display = "none";
+        viewMode.style.display = "none";
+
+        alert("Admin Mode চালু হয়েছে");
 
         loadData();
 
@@ -69,7 +74,6 @@ function adminLogin() {
     }
 }
 
-// BUTTON CLICK
 adminBtn.addEventListener("click", adminLogin);
 
 adminBtn2.addEventListener("click", adminLogin);
@@ -79,7 +83,7 @@ window.addData = async function () {
 
     if (!isAdmin) {
 
-        alert("শুধু Admin ডাটা যোগ করতে পারবে");
+        alert("শুধু Admin Add করতে পারবে");
 
         return;
     }
@@ -90,6 +94,8 @@ window.addData = async function () {
 
     const date = document.getElementById("date").value;
 
+    const type = document.getElementById("type").value;
+
     if (!name || !amount || !date) {
 
         alert("সব তথ্য দিন");
@@ -99,11 +105,13 @@ window.addData = async function () {
 
     await addDoc(collection(db, "moneyList"), {
 
-        name: name,
+        name,
 
         amount: Number(amount),
 
-        date: date
+        date,
+
+        type
     });
 
     document.getElementById("name").value = "";
@@ -113,12 +121,12 @@ window.addData = async function () {
     document.getElementById("date").value = "";
 };
 
-// DELETE DATA
+// DELETE
 window.deleteData = async function (id) {
 
     if (!isAdmin) {
 
-        alert("শুধু Admin ডিলিট করতে পারবে");
+        alert("শুধু Admin Delete করতে পারবে");
 
         return;
     }
@@ -131,8 +139,13 @@ window.deleteData = async function (id) {
     }
 };
 
-// EDIT DATA
-window.editData = async function (id, oldName, oldAmount, oldDate) {
+// EDIT
+window.editData = async function (
+    id,
+    oldName,
+    oldAmount,
+    oldDate
+) {
 
     if (!isAdmin) {
 
@@ -141,11 +154,11 @@ window.editData = async function (id, oldName, oldAmount, oldDate) {
         return;
     }
 
-    const newName = prompt("নতুন নাম লিখুন", oldName);
+    const newName = prompt("নাম", oldName);
 
-    const newAmount = prompt("নতুন টাকার পরিমাণ লিখুন", oldAmount);
+    const newAmount = prompt("টাকা", oldAmount);
 
-    const newDate = prompt("নতুন তারিখ লিখুন", oldDate);
+    const newDate = prompt("তারিখ", oldDate);
 
     if (!newName || !newAmount || !newDate) {
 
@@ -164,18 +177,18 @@ window.editData = async function (id, oldName, oldAmount, oldDate) {
     });
 };
 
-// REALTIME DATA
-const list = document.getElementById("list");
-
-const total = document.getElementById("total");
-
+// LOAD DATA
 function loadData() {
 
     onSnapshot(collection(db, "moneyList"), (snapshot) => {
 
-        list.innerHTML = "";
+        incomeList.innerHTML = "";
 
-        let totalMoney = 0;
+        expenseList.innerHTML = "";
+
+        let incomeTotal = 0;
+
+        let expenseTotal = 0;
 
         snapshot.forEach((item) => {
 
@@ -183,9 +196,7 @@ function loadData() {
 
             const id = item.id;
 
-            totalMoney += Number(data.amount);
-
-            list.innerHTML += `
+            const row = `
 
             <tr>
 
@@ -200,15 +211,24 @@ function loadData() {
                     ${isAdmin ? `
 
                         <button
-                            class="edit-btn"
-                            onclick="editData('${id}', '${data.name}', '${data.amount}', '${data.date}')">
-                            Edit
+                        class="edit-btn"
+                        onclick="editData(
+                        '${id}',
+                        '${data.name}',
+                        '${data.amount}',
+                        '${data.date}'
+                        )">
+
+                        Edit
+
                         </button>
 
                         <button
-                            class="delete-btn"
-                            onclick="deleteData('${id}')">
-                            Delete
+                        class="delete-btn"
+                        onclick="deleteData('${id}')">
+
+                        Delete
+
                         </button>
 
                     ` : `
@@ -223,11 +243,33 @@ function loadData() {
 
             </tr>
             `;
+
+            // INCOME
+            if (data.type === "income") {
+
+                incomeTotal += Number(data.amount);
+
+                incomeList.innerHTML += row;
+
+            } else {
+
+                // EXPENSE
+                expenseTotal += Number(data.amount);
+
+                expenseList.innerHTML += row;
+            }
         });
 
-        total.innerText = totalMoney;
+        document.getElementById("incomeTotal").innerText =
+            incomeTotal;
+
+        document.getElementById("expenseTotal").innerText =
+            expenseTotal;
+
+        document.getElementById("balance").innerText =
+            incomeTotal - expenseTotal;
     });
 }
 
-// DEFAULT VIEW MODE
+// DEFAULT LOAD
 loadData();

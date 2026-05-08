@@ -2,10 +2,9 @@
 <html lang="bn">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-    <title>টাকা তোলার লিস্ট</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Money Management</title>
 
     <style>
         body {
@@ -15,11 +14,11 @@
         }
 
         .box {
+            max-width: 1000px;
+            margin: auto;
             background: white;
             padding: 20px;
             border-radius: 12px;
-            max-width: 850px;
-            margin: auto;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
 
@@ -28,27 +27,34 @@
             margin-bottom: 20px;
         }
 
-        #formBox input {
+        .section {
+            margin-top: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+        }
+
+        input,
+        select {
             width: 100%;
             padding: 10px;
             margin-top: 10px;
             box-sizing: border-box;
         }
 
-        .button-area {
+        .button-row {
             display: flex;
             gap: 10px;
             margin-top: 10px;
         }
 
-        .button-area button {
+        button {
             flex: 1;
             padding: 10px;
             border: none;
             color: white;
             cursor: pointer;
             border-radius: 5px;
-            font-size: 15px;
         }
 
         .add-btn {
@@ -59,73 +65,41 @@
             background: black;
         }
 
+        .edit-btn {
+            background: orange;
+            padding: 7px 12px;
+        }
+
+        .delete-btn {
+            background: red;
+            padding: 7px 12px;
+            margin-left: 5px;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 25px;
+            margin-top: 20px;
         }
 
-        table th,
-        table td {
+        th,
+        td {
             border: 1px solid #ddd;
             padding: 10px;
             text-align: center;
         }
 
-        table th {
-            background: #f0f0f0;
-        }
-
         .total {
-            margin-top: 20px;
-            font-size: 22px;
+            margin-top: 15px;
+            font-size: 20px;
             font-weight: bold;
-            color: green;
-            text-align: center;
-        }
-
-        .edit-btn {
-            background: orange;
-            color: white;
-            border: none;
-            padding: 7px 12px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .delete-btn {
-            background: red;
-            color: white;
-            border: none;
-            padding: 7px 12px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-left: 5px;
         }
 
         .footer {
-            margin-top: 35px;
+            margin-top: 40px;
+            text-align: center;
             border-top: 1px solid #ddd;
             padding-top: 20px;
-            text-align: center;
-            line-height: 30px;
-        }
-
-        .footer-number {
-            font-size: 22px;
-            font-weight: bold;
-            color: #111;
-        }
-
-        .footer-method {
-            color: green;
-            font-size: 18px;
-            font-weight: bold;
-        }
-
-        .footer-note {
-            color: gray;
-            font-size: 15px;
         }
 
         .view-text {
@@ -139,10 +113,10 @@
 
     <div class="box">
 
-        <h2>টাকা তোলার লিস্ট</h2>
+        <h2>টাকা ম্যানেজমেন্ট সিস্টেম</h2>
 
-        <!-- ADMIN FORM -->
-        <div id="formBox" style="display: none;">
+        <!-- FORM -->
+        <div id="formBox" style="display:none;">
 
             <input type="text" id="name" placeholder="নাম">
 
@@ -150,7 +124,12 @@
 
             <input type="date" id="date">
 
-            <div class="button-area">
+            <select id="type">
+                <option value="income">টাকা উঠানো</option>
+                <option value="expense">টাকা খরচ</option>
+            </select>
+
+            <div class="button-row">
 
                 <button class="add-btn" onclick="addData()">
                     যোগ করুন
@@ -164,36 +143,80 @@
 
         </div>
 
-        <!-- USER MODE ADMIN BUTTON -->
-        <div id="viewAdminBox" class="button-area">
+        <!-- VIEW MODE -->
+        <div id="viewMode">
 
-            <button class="admin-btn" id="adminBtn2">
-                Admin Login
-            </button>
+            <div class="button-row">
+
+                <button class="admin-btn" id="adminBtn2">
+                    Admin Login
+                </button>
+
+            </div>
 
         </div>
 
-        <!-- TABLE -->
-        <table>
+        <!-- INCOME -->
+        <div class="section">
 
-            <thead>
+            <h3>টাকা উত্তোলন</h3>
 
-                <tr>
-                    <th>নাম</th>
-                    <th>টাকা</th>
-                    <th>তারিখ</th>
-                    <th>অ্যাকশন</th>
-                </tr>
+            <table>
 
-            </thead>
+                <thead>
+                    <tr>
+                        <th>নাম</th>
+                        <th>টাকা</th>
+                        <th>তারিখ</th>
+                        <th>অ্যাকশন</th>
+                    </tr>
+                </thead>
 
-            <tbody id="list"></tbody>
+                <tbody id="incomeList"></tbody>
 
-        </table>
+            </table>
 
-        <!-- TOTAL -->
-        <div class="total">
-            মোট টাকা: ৳ <span id="total">0</span>
+            <div class="total">
+                মোট উত্তোলন: ৳ <span id="incomeTotal">0</span>
+            </div>
+
+        </div>
+
+        <!-- EXPENSE -->
+        <div class="section">
+
+            <h3>টাকা খরচ</h3>
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>নাম</th>
+                        <th>টাকা</th>
+                        <th>তারিখ</th>
+                        <th>অ্যাকশন</th>
+                    </tr>
+                </thead>
+
+                <tbody id="expenseList"></tbody>
+
+            </table>
+
+            <div class="total">
+                মোট খরচ: ৳ <span id="expenseTotal">0</span>
+            </div>
+
+        </div>
+
+        <!-- BALANCE -->
+        <div class="section">
+
+            <h3>খরচের পর অবশিষ্ট টাকা</h3>
+
+            <div class="total">
+                বর্তমান ব্যালেন্স: ৳ <span id="balance">0</span>
+            </div>
+
         </div>
 
         <!-- FOOTER -->
@@ -203,20 +226,20 @@
                 পেমেন্ট করুন
             </div>
 
-            <div class="footer-number">
+            <div style="font-size:22px;font-weight:bold;">
                 📱 01893454283
             </div>
 
-            <div class="footer-method">
+            <div style="color:green;font-weight:bold;">
                 বিকাশ / নগদ / রকেট
             </div>
 
-            <div class="footer-note">
+            <div style="color:gray;">
                 (পার্সোনাল নাম্বার)
             </div>
 
             <div style="margin-top:10px;color:#999;font-size:14px;">
-                টাকা পাঠানোর পর Admin কে জানিয়ে দিন
+                টাকা পাঠানোর পর Admin কে জানিয়ে দিন ।
             </div>
 
         </div>
