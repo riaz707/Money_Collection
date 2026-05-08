@@ -10,7 +10,10 @@ import {
     updateDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// Firebase Config
+// ======================
+// FIREBASE CONFIG
+// ======================
+
 const firebaseConfig = {
     apiKey: "AIzaSyDmOGNtpssOPd9752gHWRR2c4QJN28CEc8",
     authDomain: "money-callection.firebaseapp.com",
@@ -21,12 +24,15 @@ const firebaseConfig = {
     measurementId: "G-DRF9SCD90B"
 };
 
-// Firebase Initialize
+// ======================
+// FIREBASE INITIALIZE
+// ======================
+
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 // ======================
-// ADMIN PASSWORD SYSTEM
+// ADMIN SYSTEM
 // ======================
 
 const adminPassword = "181058";
@@ -49,9 +55,11 @@ if (password === adminPassword) {
 // HIDE FORM FOR USER
 // ======================
 
-if (!isAdmin) {
+const formBox = document.getElementById("formBox");
 
-    document.getElementById("formBox").style.display = "none";
+if (formBox && !isAdmin) {
+
+    formBox.style.display = "none";
 }
 
 // ======================
@@ -195,7 +203,7 @@ onSnapshot(collection(db, "moneyList"), (snapshot) => {
         totalMoney += Number(data.amount);
 
         list.innerHTML += `
-        
+
         <tr>
 
             <td>${data.name}</td>
@@ -206,42 +214,42 @@ onSnapshot(collection(db, "moneyList"), (snapshot) => {
 
             <td>
 
-            ${isAdmin ? `
+                ${isAdmin ? `
 
-                <button
-                    style="
-                        background:orange;
-                        color:white;
-                        padding:7px 12px;
-                        border:none;
-                        border-radius:5px;
-                        cursor:pointer;
-                    "
-                    onclick="editData('${id}', '${data.name}', '${data.amount}', '${data.date}')">
-                    Edit
-                </button>
+                    <button
+                        style="
+                            background:orange;
+                            color:white;
+                            padding:7px 12px;
+                            border:none;
+                            border-radius:5px;
+                            cursor:pointer;
+                        "
+                        onclick="editData('${id}', '${data.name}', '${data.amount}', '${data.date}')">
+                        Edit
+                    </button>
 
-                <button
-                    style="
-                        background:red;
-                        color:white;
-                        padding:7px 12px;
-                        border:none;
-                        border-radius:5px;
-                        cursor:pointer;
-                        margin-left:5px;
-                    "
-                    onclick="deleteData('${id}')">
-                    Delete
-                </button>
+                    <button
+                        style="
+                            background:red;
+                            color:white;
+                            padding:7px 12px;
+                            border:none;
+                            border-radius:5px;
+                            cursor:pointer;
+                            margin-left:5px;
+                        "
+                        onclick="deleteData('${id}')">
+                        Delete
+                    </button>
 
-            ` : `
+                ` : `
 
-                <span style="color:gray;">
-                    Only View
-                </span>
+                    <span style="color:gray;">
+                        Only View
+                    </span>
 
-            `}
+                `}
 
             </td>
 
@@ -249,6 +257,6 @@ onSnapshot(collection(db, "moneyList"), (snapshot) => {
         `;
     });
 
-    // Total Money
+    // TOTAL MONEY
     total.innerText = totalMoney;
 });
