@@ -220,41 +220,34 @@ function loadData() {
 
                 <td>${data.date}</td>
 
-                <td>
+               ${isAdmin ? `
 
-                    ${isAdmin ? `
+<td>
 
-                        <button
-                        class="edit-btn"
-                        onclick="editData(
-                        '${data.id}',
-                        '${data.name}',
-                        '${data.amount}',
-                        '${data.date}'
-                        )">
+    <button
+    class="edit-btn"
+    onclick="editData(
+    '${data.id}',
+    '${data.name}',
+    '${data.amount}',
+    '${data.date}'
+    )">
 
-                        Edit
+    Edit
 
-                        </button>
+    </button>
 
-                        <button
-                        class="delete-btn"
-                        onclick="deleteData('${data.id}')">
+    <button
+    class="delete-btn"
+    onclick="deleteData('${data.id}')">
 
-                        Delete
+    Delete
 
-                        </button>
+    </button>
 
-                    ` : `
+</td>
 
-                        <span class="view-text">
-                            Only View
-                        </span>
-
-                    `}
-
-                </td>
-
+` : ``}
             </tr>
             `;
 

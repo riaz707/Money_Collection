@@ -161,6 +161,33 @@
                 line-height: 28px;
             }
         }
+
+        /* MOBILE TABLE FIX */
+
+        @media (max-width: 768px) {
+
+            table {
+                min-width: unset;
+            }
+
+            th,
+            td {
+                font-size: 13px;
+                padding: 6px;
+                white-space: nowrap;
+            }
+
+            td:first-child,
+            th:first-child {
+                width: 1%;
+            }
+
+            .edit-btn,
+            .delete-btn {
+                padding: 5px 8px;
+                font-size: 12px;
+            }
+        }
     </style>
 </head>
 
@@ -223,7 +250,6 @@
                         <th>নাম</th>
                         <th>টাকা</th>
                         <th>তারিখ</th>
-                        <th>অ্যাকশন</th>
                     </tr>
                 </thead>
 
@@ -249,7 +275,6 @@
                         <th>নাম</th>
                         <th>টাকা</th>
                         <th>তারিখ</th>
-                        <th>অ্যাকশন</th>
                     </tr>
                 </thead>
 
