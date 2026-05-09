@@ -92,16 +92,22 @@ window.addData = async function () {
 
     const amount = document.getElementById("amount").value;
 
-    const date = document.getElementById("date").value;
+    const rawDate = document.getElementById("date").value;
 
     const type = document.getElementById("type").value;
 
-    if (!name || !amount || !date) {
+    if (!name || !amount || !rawDate) {
 
         alert("সব তথ্য দিন");
 
         return;
     }
+
+    // DATE FORMAT
+    const parts = rawDate.split("-");
+
+    const formattedDate =
+        `${parts[2]}-${parts[1]}-${parts[0]}`;
 
     await addDoc(collection(db, "moneyList"), {
 
@@ -109,7 +115,7 @@ window.addData = async function () {
 
         amount: Number(amount),
 
-        date,
+        date: formattedDate,
 
         type
     });
