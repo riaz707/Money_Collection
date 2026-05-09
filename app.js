@@ -190,11 +190,25 @@ function loadData() {
 
         let expenseTotal = 0;
 
+        // ARRAY
+        let allData = [];
+
         snapshot.forEach((item) => {
 
-            const data = item.data();
+            allData.push({
+                id: item.id,
+                ...item.data()
+            });
+        });
 
-            const id = item.id;
+        // SORT LATEST FIRST
+        allData.sort((a, b) => {
+
+            return new Date(b.date) - new Date(a.date);
+        });
+
+        // SHOW DATA
+        allData.forEach((data) => {
 
             const row = `
 
@@ -213,7 +227,7 @@ function loadData() {
                         <button
                         class="edit-btn"
                         onclick="editData(
-                        '${id}',
+                        '${data.id}',
                         '${data.name}',
                         '${data.amount}',
                         '${data.date}'
@@ -225,7 +239,7 @@ function loadData() {
 
                         <button
                         class="delete-btn"
-                        onclick="deleteData('${id}')">
+                        onclick="deleteData('${data.id}')">
 
                         Delete
 
@@ -251,15 +265,18 @@ function loadData() {
 
                 incomeList.innerHTML += row;
 
-            } else {
+            }
 
-                // EXPENSE
+            // EXPENSE
+            else {
+
                 expenseTotal += Number(data.amount);
 
                 expenseList.innerHTML += row;
             }
         });
 
+        // TOTAL
         document.getElementById("incomeTotal").innerText =
             incomeTotal;
 

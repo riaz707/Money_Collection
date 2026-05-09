@@ -106,6 +106,61 @@
             color: gray;
             font-size: 14px;
         }
+
+
+        /* MOBILE RESPONSIVE */
+
+        @media (max-width: 768px) {
+
+            body {
+                padding: 10px;
+            }
+
+            .box {
+                padding: 12px;
+            }
+
+            h2 {
+                font-size: 22px;
+            }
+
+            .section {
+                padding: 12px;
+                overflow-x: auto;
+            }
+
+            table {
+                min-width: 600px;
+            }
+
+            th,
+            td {
+                padding: 8px;
+                font-size: 14px;
+            }
+
+            input,
+            select,
+            button {
+                font-size: 15px;
+            }
+
+            .button-row {
+                flex-direction: column;
+            }
+
+            .total {
+                font-size: 18px;
+            }
+
+            .footer {
+                font-size: 14px;
+            }
+
+            .footer div {
+                line-height: 28px;
+            }
+        }
     </style>
 </head>
 
@@ -125,7 +180,7 @@
             <input type="date" id="date">
 
             <select id="type">
-                <option value="income">টাকা উঠানো</option>
+                <option value="income">টাকা জমা</option>
                 <option value="expense">টাকা খরচ</option>
             </select>
 
@@ -159,7 +214,7 @@
         <!-- INCOME -->
         <div class="section">
 
-            <h3>টাকা উত্তোলন</h3>
+            <h3>টাকা জমা</h3>
 
             <table>
 
@@ -177,7 +232,7 @@
             </table>
 
             <div class="total">
-                মোট উত্তোলন: ৳ <span id="incomeTotal">0</span>
+                মোট জমা: ৳ <span id="incomeTotal">0</span>
             </div>
 
         </div>
