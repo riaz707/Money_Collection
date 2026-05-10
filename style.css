@@ -382,3 +382,178 @@ tbody tr:nth-child(even) {
 #paymentCopyArea:hover #phoneNumber {
     color: #1a365d;
 }
+
+
+
+
+/* পুরো এরিয়া থেকে টাচ হাইলাইট রিমুভ করা */
+#paymentCopyArea {
+    -webkit-tap-highlight-color: transparent;
+    /* মোবাইলে টাচ করলে যে নীল শ্যাডো আসে সেটা বন্ধ হবে */
+    outline: none;
+}
+
+/* নম্বর বা অন্য কোনো এলিমেন্ট যেন সিলেক্ট হয়ে নীল না হয়ে যায় */
+#paymentCopyArea * {
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    /* নম্বর কপি হবে কিন্তু ক্লিক করার সময় টেক্সট নীল হয়ে সিলেক্ট হবে না */
+}
+
+/* যদি আপনি বক্সে শ্যাডো দিয়ে থাকেন, তবে active অবস্থায় সেটা রিমুভ করতে */
+#paymentCopyArea:active {
+    box-shadow: none !important;
+    background: transparent !important;
+}
+
+/* আইকনের এনিমেশন আগের মতোই থাকবে */
+.payment-icons img:active {
+    transform: scale(0.85);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    /* ক্লিক করার সময় হালকা শ্যাডো */
+}
+
+
+
+
+
+
+
+
+
+
+/* অ্যাকশন কলামের বাটনগুলো এক লাইনে রাখার জন্য */
+.admin-col {
+    white-space: nowrap;
+    /* বাটন যেন নিচে না নামে */
+    width: 1%;
+    /* কলাম যেন ছোট থাকে */
+    text-align: center;
+}
+
+/* এডিট এবং ডিলিট বাটন দুটোকেই সমান করা */
+.edit-btn,
+.del-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 45px;
+    /* নির্দিষ্ট উইডথ (সমান হবে) */
+    height: 32px;
+    /* নির্দিষ্ট হাইট */
+    padding: 0 !important;
+    font-size: 11px;
+    font-weight: bold;
+    border-radius: 6px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: none;
+    color: white;
+}
+
+.edit-btn {
+    background: #dd6b20;
+    margin-right: 5px;
+    /* দুই বাটনের মাঝখানে গ্যাপ */
+}
+
+.del-btn {
+    background: #e53e3e;
+}
+
+/* টাচ করলে হালকা ছোট হবে (এনিমেশন) */
+.edit-btn:active,
+.del-btn:active {
+    transform: scale(0.9);
+}
+
+/* মোবাইল ভার্সনে টেবিলের ফন্ট একটু ছোট করা যাতে সব ধরে */
+@media (max-width: 480px) {
+
+    th,
+    td {
+        font-size: 12px;
+        padding: 8px 3px;
+    }
+
+    .edit-btn,
+    .del-btn {
+        width: 40px;
+        /* মোবাইলে সামান্য ছোট */
+        height: 28px;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* টেবিলের বর্ডার এবং স্ট্রাকচার */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    /* বর্ডারগুলো জোড়া লাগানোর জন্য collapse ব্যবহার করা হয়েছে */
+    margin-top: 10px;
+    border: 1px solid #cbd5e0;
+    /* টেবিলের চারপাশের মেইন বর্ডার */
+}
+
+/* কলামের হেডার (th) এবং সেলের (td) জন্য বর্ডার */
+th,
+td {
+    padding: 12px 8px;
+    text-align: center;
+    border-bottom: 1px solid #cbd5e0;
+    /* নিচের দাগ */
+    border-right: 1px solid #cbd5e0;
+    /* ডান পাশের লম্বালম্বি দাগ (Vertical Line) */
+    font-size: 14px;
+}
+
+/* শেষ কলামের (অ্যাকশন) ডানের দাগটা রিমুভ করা যাতে দেখতে সুন্দর লাগে */
+th:last-child,
+td:last-child {
+    border-right: none;
+}
+
+/* টেবিল হেডার কালার */
+th {
+    background: #2d3748;
+    color: white;
+    border-right: 1px solid #4a5568;
+    /* হেডারের ভেতরের লম্বালম্বি দাগ */
+}
+
+/* Zebra Stripe (একটির পর একটি কালার পরিবর্তন) */
+tbody tr:nth-child(even) td {
+    background-color: #f7fafc;
+}
+
+tbody tr:nth-child(odd) td {
+    background-color: #ffffff;
+}
+
+/* হোভার করলে হালকা কালার পরিবর্তন */
+tbody tr:hover td {
+    background-color: #edf2f7 !important;
+}
+
+/* মোবাইলের জন্য সামান্য অ্যাডজাস্টমেন্ট */
+@media (max-width: 480px) {
+
+    th,
+    td {
+        padding: 8px 4px;
+        font-size: 12px;
+    }
+}
