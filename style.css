@@ -1,0 +1,384 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+body {
+    background: #f0f2f5;
+    padding: 15px;
+}
+
+.box {
+    max-width: 1100px;
+    margin: auto;
+    background: white;
+    padding: 25px;
+    border-radius: 20px;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #1a202c;
+}
+
+.section {
+    margin-top: 25px;
+    border: 1px solid #edf2f7;
+    border-radius: 15px;
+    padding: 15px;
+    overflow-x: auto;
+}
+
+input,
+select {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #cbd5e0;
+    margin-top: 10px;
+    outline: none;
+}
+
+.button-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.right {
+    justify-content: flex-end;
+}
+
+button {
+    border: none;
+    padding: 10px 18px;
+    border-radius: 10px;
+    color: white;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.add-btn {
+    background: #2f855a;
+    flex: 1;
+}
+
+.admin-btn {
+    background: #2d3748;
+}
+
+.delete-btn {
+    background: #e53e3e;
+}
+
+.edit-btn {
+    background: #dd6b20;
+    font-size: 13px;
+    margin-right: 5px;
+}
+
+.del-btn {
+    background: #e53e3e;
+    font-size: 13px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    min-width: 500px;
+}
+
+th {
+    background: #2d3748;
+    color: white;
+    padding: 12px;
+    text-align: center;
+}
+
+td {
+    padding: 12px;
+    border-bottom: 1px solid #edf2f7;
+    text-align: center;
+    font-size: 14px;
+}
+
+/* Zebra Stripe */
+tbody tr:nth-child(odd) {
+    background: #ffffff;
+}
+
+tbody tr:nth-child(even) {
+    background: #f7fafc;
+}
+
+/* অ্যাকশন কলাম ডিফল্টভাবে লুকানো থাকবে */
+.admin-col {
+    display: none;
+}
+
+.total {
+    margin-top: 15px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #2d3748;
+}
+
+.balance {
+    background: #ebf8ff;
+    border: 1px solid #bee3f8;
+    text-align: center;
+    padding: 15px;
+    margin-top: 20px;
+    border-radius: 15px;
+}
+
+/* Footer & Toast */
+.footer {
+    margin-top: 50px;
+    padding-top: 20px;
+    border-top: 1px solid #e2e8f0;
+    text-align: center;
+}
+
+.phone-card {
+    display: inline-flex;
+    align-items: center;
+    border: 2px solid #3182ce;
+    padding: 8px 15px;
+    border-radius: 50px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.phone-card .num {
+    font-size: 20px;
+    font-weight: bold;
+    color: #2b6cb0;
+    margin-right: 10px;
+}
+
+.social-links {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 15px;
+}
+
+.s-btn {
+    text-decoration: none;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 10px;
+    font-size: 14px;
+}
+
+.wa {
+    background: #25D366;
+}
+
+.call {
+    background: #3182ce;
+}
+
+.msg {
+    background: #0084FF;
+}
+
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-box {
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 350px;
+    text-align: center;
+}
+
+.toast {
+    position: fixed;
+    bottom: -50px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 50px;
+    transition: 0.4s;
+    opacity: 0;
+    z-index: 2000;
+}
+
+.toast.show {
+    bottom: 50px;
+    opacity: 1;
+}
+
+
+
+
+
+
+/* MOBILE RESPONSIVE */
+
+@media (max-width: 768px) {
+
+    body {
+        padding: 10px;
+    }
+
+    .box {
+        padding: 12px;
+    }
+
+    h2 {
+        font-size: 22px;
+    }
+
+    .section {
+        padding: 12px;
+        overflow-x: auto;
+    }
+
+    table {
+        min-width: 600px;
+    }
+
+    th,
+    td {
+        padding: 8px;
+        font-size: 14px;
+    }
+
+    input,
+    select,
+    button {
+        font-size: 15px;
+    }
+
+    .button-row {
+        flex-direction: column;
+    }
+
+    .total {
+        font-size: 18px;
+    }
+
+    .footer {
+        font-size: 14px;
+    }
+
+    .footer div {
+        line-height: 28px;
+    }
+}
+
+/* MOBILE TABLE FIX */
+
+@media (max-width: 768px) {
+
+    table {
+        min-width: unset;
+    }
+
+    th,
+    td {
+        font-size: 13px;
+        padding: 6px;
+        white-space: nowrap;
+    }
+
+    td:first-child,
+    th:first-child {
+        width: 1%;
+    }
+
+    .edit-btn,
+    .delete-btn {
+        padding: 5px 8px;
+        font-size: 12px;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+/* bkash nagad roket icon */
+.payment-icons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 10px;
+}
+
+.payment-icons img {
+    width: 45px;
+    /* আইকনের সাইজ */
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    background: white;
+    padding: 2px;
+}
+
+/* মোবাইল ভার্সনে আইকন একটু ছোট দেখাবে */
+@media (max-width: 480px) {
+    .payment-icons img {
+        width: 35px;
+    }
+}
+
+
+
+
+
+
+
+.payment-icons img {
+    width: 45px;
+    height: auto;
+    border-radius: 8px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+    background: white;
+    padding: 2px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* শুধুমাত্র যে আইকনে ক্লিক (active) করা হবে সেটিই ছোট হবে */
+.payment-icons img:active {
+    transform: scale(0.85);
+    /* আইকনটি ছোট হবে */
+    box-shadow: 0 0px 2px rgba(0, 0, 0, 0.2);
+    /* শ্যাডো কমে যাবে */
+}
+
+/* নম্বরটি আলাদাভাবে একটিভ এনিমেশন চাইলে */
+#phoneNumber:active {
+    transform: scale(0.95);
+    transition: 0.1s;
+}
+
+#paymentCopyArea:hover #phoneNumber {
+    color: #1a365d;
+}

@@ -1,291 +1,198 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-import {
-    getFirestore,
-    collection,
-    addDoc,
-    onSnapshot,
-    deleteDoc,
-    doc,
-    updateDoc
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-// FIREBASE CONFIG
 const firebaseConfig = {
-
     apiKey: "AIzaSyDmOGNtpssOPd9752gHWRR2c4QJN28CEc8",
-
     authDomain: "money-callection.firebaseapp.com",
-
     projectId: "money-callection",
-
     storageBucket: "money-callection.firebasestorage.app",
-
     messagingSenderId: "741567569972",
-
-    appId: "1:741567569972:web:193d6f62b3528a095daa61",
-
-    measurementId: "G-DRF9SCD90B"
+    appId: "1:741567569972:web:193d6f62b3528a095daa61"
 };
 
-// FIREBASE INIT
 const app = initializeApp(firebaseConfig);
-
 const db = getFirestore(app);
 
-// ADMIN PASSWORD
-const adminPassword = "181058";
-
+const PASS = "181058";
 let isAdmin = false;
+let globalData = [];
+let currentEditId = null;
 
-// ELEMENTS
-const formBox = document.getElementById("formBox");
+const el = {
+    income: document.getElementById("incomeList"),
+    expense: document.getElementById("expenseList"),
+    incomeTotal: document.getElementById("incomeTotal"),
+    expenseTotal: document.getElementById("expenseTotal"),
+    balance: document.getElementById("balance"),
+    form: document.getElementById("formBox"),
+    modal: document.getElementById("loginModal"),
+    editModal: document.getElementById("editModal"),
+    adminBtn: document.getElementById("adminBtn"),
+    logoutBtn: document.getElementById("logoutBtn"),
+    toast: document.getElementById("toast")
+};
 
-const viewMode = document.getElementById("viewMode");
+// Admin Login Logic
+el.adminBtn.onclick = () => el.modal.style.display = "flex";
+el.logoutBtn.onclick = () => location.reload();
 
-const adminBtn = document.getElementById("adminBtn");
-
-const adminBtn2 = document.getElementById("adminBtn2");
-
-const incomeList = document.getElementById("incomeList");
-
-const expenseList = document.getElementById("expenseList");
-
-// ADMIN LOGIN
-function adminLogin() {
-
-    const password = prompt("Admin Password দিন");
-
-    if (password === adminPassword) {
-
+document.getElementById("loginBtn").onclick = () => {
+    if (document.getElementById("pass").value === PASS) {
         isAdmin = true;
-
-        formBox.style.display = "block";
-
-        viewMode.style.display = "none";
-
-        alert("Admin Mode চালু হয়েছে");
-
-        loadData();
-
+        el.form.style.display = "block";
+        el.logoutBtn.style.display = "inline-block";
+        el.adminBtn.style.display = "none";
+        el.modal.style.display = "none";
+        render(globalData); // লগইন করার পর সব রি-রেন্ডার হবে
     } else {
-
-        alert("ভুল Password");
+        alert("ভুল পাসওয়ার্ড!");
     }
-}
+};
 
-adminBtn.addEventListener("click", adminLogin);
+document.getElementById("closeModal").onclick = () => el.modal.style.display = "none";
+document.getElementById("closeEditModal").onclick = () => el.editModal.style.display = "none";
 
-adminBtn2.addEventListener("click", adminLogin);
-
-// ADD DATA
-window.addData = async function () {
-
-    if (!isAdmin) {
-
-        alert("শুধু Admin Add করতে পারবে");
-
-        return;
-    }
-
+// Add Data (Validation সহ)
+document.getElementById("saveBtn").onclick = async () => {
     const name = document.getElementById("name").value;
-
     const amount = document.getElementById("amount").value;
-
-    const rawDate = document.getElementById("date").value;
-
+    const date = document.getElementById("date").value;
     const type = document.getElementById("type").value;
 
-    if (!name || !amount || !rawDate) {
-
-        alert("সব তথ্য দিন");
-
+    if (!name || !amount || !date) {
+        alert("সবগুলো ঘর পূরণ করুন!");
         return;
     }
 
-    // DATE FORMAT
-    const parts = rawDate.split("-");
-
-    const formattedDate =
-        `${parts[2]}-${parts[1]}-${parts[0]}`;
-
     await addDoc(collection(db, "moneyList"), {
-
         name,
-
         amount: Number(amount),
-
-        date: formattedDate,
-
-        type
+        date,
+        type,
+        time: serverTimestamp()
     });
 
     document.getElementById("name").value = "";
-
     document.getElementById("amount").value = "";
-
-    document.getElementById("date").value = "";
 };
 
-// DELETE
-window.deleteData = async function (id) {
+// Real-time Listener
+onSnapshot(collection(db, "moneyList"), snap => {
+    globalData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-    if (!isAdmin) {
-
-        alert("শুধু Admin Delete করতে পারবে");
-
-        return;
-    }
-
-    const confirmDelete = confirm("ডিলিট করতে চান?");
-
-    if (confirmDelete) {
-
-        await deleteDoc(doc(db, "moneyList", id));
-    }
-};
-
-// EDIT
-window.editData = async function (
-    id,
-    oldName,
-    oldAmount,
-    oldDate
-) {
-
-    if (!isAdmin) {
-
-        alert("শুধু Admin Edit করতে পারবে");
-
-        return;
-    }
-
-    const newName = prompt("নাম", oldName);
-
-    const newAmount = prompt("টাকা", oldAmount);
-
-    const newDate = prompt("তারিখ", oldDate);
-
-    if (!newName || !newAmount || !newDate) {
-
-        alert("সব তথ্য দিন");
-
-        return;
-    }
-
-    await updateDoc(doc(db, "moneyList", id), {
-
-        name: newName,
-
-        amount: Number(newAmount),
-
-        date: newDate
+    // সর্টিং: তারিখ (নতুন আগে), একই তারিখ হলে এন্ট্রি টাইম (নতুন আগে)
+    globalData.sort((a, b) => {
+        if (b.date !== a.date) return new Date(b.date) - new Date(a.date);
+        return (b.time?.seconds || 0) - (a.time?.seconds || 0);
     });
-};
 
-// LOAD DATA
-function loadData() {
+    render(globalData);
+});
 
-    onSnapshot(collection(db, "moneyList"), (snapshot) => {
+// Render Function
+function render(data) {
+    el.income.innerHTML = "";
+    el.expense.innerHTML = "";
+    let inTotal = 0, exTotal = 0;
 
-        incomeList.innerHTML = "";
+    data.forEach(d => {
+        const dObj = new Date(d.date);
+        const fDate = `${String(dObj.getDate()).padStart(2, '0')}-${String(dObj.getMonth() + 1).padStart(2, '0')}-${dObj.getFullYear()}`;
 
-        expenseList.innerHTML = "";
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td>${d.name}</td>
+            <td>${d.amount}</td>
+            <td>${fDate}</td>
+            <td class="admin-col" style="display: ${isAdmin ? 'table-cell' : 'none'}">
+                <button class="edit-btn" data-id="${d.id}">Edit</button>
+                <button class="del-btn" data-id="${d.id}">Delete</button>
+            </td>
+        `;
 
-        let incomeTotal = 0;
+        if (d.type === "income") {
+            inTotal += d.amount;
+            el.income.appendChild(row);
+        } else {
+            exTotal += d.amount;
+            el.expense.appendChild(row);
+        }
+    });
 
-        let expenseTotal = 0;
+    el.incomeTotal.innerText = inTotal;
+    el.expenseTotal.innerText = exTotal;
+    el.balance.innerHTML = `<h3>💵 বর্তমান ব্যালেন্স: ৳ ${inTotal - exTotal}</h3>`;
 
-        // ARRAY
-        let allData = [];
+    // লগইন অবস্থায় থাকলে হেডার এবং বডির Action কলাম দেখানো হবে
+    document.querySelectorAll(".admin-col").forEach(col => {
+        col.style.display = isAdmin ? "table-cell" : "none";
+    });
 
-        snapshot.forEach((item) => {
-
-            allData.push({
-                id: item.id,
-                ...item.data()
-            });
-        });
-
-        // SORT LATEST FIRST
-        allData.sort((a, b) => {
-
-            return new Date(b.date) - new Date(a.date);
-        });
-
-        // SHOW DATA
-        allData.forEach((data) => {
-
-            const row = `
-
-            <tr>
-
-                <td>${data.name}</td>
-
-                <td>৳ ${data.amount}</td>
-
-                <td>${data.date}</td>
-
-               ${isAdmin ? `
-
-<td>
-
-    <button
-    class="edit-btn"
-    onclick="editData(
-    '${data.id}',
-    '${data.name}',
-    '${data.amount}',
-    '${data.date}'
-    )">
-
-    Edit
-
-    </button>
-
-    <button
-    class="delete-btn"
-    onclick="deleteData('${data.id}')">
-
-    Delete
-
-    </button>
-
-</td>
-
-` : ``}
-            </tr>
-            `;
-
-            // INCOME
-            if (data.type === "income") {
-
-                incomeTotal += Number(data.amount);
-
-                incomeList.innerHTML += row;
-
+    // Delete Logic (Permission সহ)
+    document.querySelectorAll(".del-btn").forEach(btn => {
+        btn.onclick = async (e) => {
+            const id = e.currentTarget.dataset.id;
+            if (confirm("আপনি কি নিশ্চিত এটি মুছে ফেলতে চান?")) {
+                await deleteDoc(doc(db, "moneyList", id));
             }
+        };
+    });
 
-            // EXPENSE
-            else {
-
-                expenseTotal += Number(data.amount);
-
-                expenseList.innerHTML += row;
-            }
-        });
-
-        // TOTAL
-        document.getElementById("incomeTotal").innerText =
-            incomeTotal;
-
-        document.getElementById("expenseTotal").innerText =
-            expenseTotal;
-
-        document.getElementById("balance").innerText =
-            incomeTotal - expenseTotal;
+    // Edit Logic
+    document.querySelectorAll(".edit-btn").forEach(btn => {
+        btn.onclick = (e) => {
+            const id = e.currentTarget.dataset.id;
+            const item = globalData.find(x => x.id === id);
+            currentEditId = id;
+            document.getElementById("editName").value = item.name;
+            document.getElementById("editAmount").value = item.amount;
+            document.getElementById("editDate").value = item.date;
+            document.getElementById("editType").value = item.type;
+            el.editModal.style.display = "flex";
+        };
     });
 }
 
-// DEFAULT LOAD
-loadData();
+// Update Data (পজিশন চেঞ্জ হবে না)
+document.getElementById("updateBtn").onclick = async () => {
+    const name = document.getElementById("editName").value;
+    const amount = document.getElementById("editAmount").value;
+    const date = document.getElementById("editDate").value;
+    const type = document.getElementById("editType").value;
+
+    if (!name || !amount || !date) return alert("তথ্য পূরণ করুন!");
+
+    await updateDoc(doc(db, "moneyList", currentEditId), {
+        name, amount: Number(amount), date, type
+    });
+
+    el.editModal.style.display = "none";
+};
+
+// Copy & Footer System
+// document.getElementById("phoneNumber").onclick = () => {
+//     navigator.clipboard.writeText("01893454283");
+//     el.toast.classList.add("show");
+//     setTimeout(() => el.toast.classList.remove("show"), 2000);
+// };
+
+
+// কপি ফাংশন
+const copyNumber = () => {
+    const number = "01893454283";
+    navigator.clipboard.writeText(number).then(() => {
+        // তোমার তৈরি করা সেই প্রফেশনাল টোস্ট পপআপ দেখাবে
+        const toast = document.getElementById("toast");
+        toast.classList.add("show");
+        setTimeout(() => toast.classList.remove("show"), 2000);
+    }).catch(err => {
+        console.error("Copy failed", err);
+    });
+};
+
+// আইকন এরিয়া এবং নম্বর—উভয় জায়গাতেই ক্লিক করলে কপি হবে
+document.getElementById("paymentCopyArea").onclick = copyNumber;
+
+
+// document.getElementById("whatsappBtn").href = `https://wa.me/8801893454283`;
+// document.getElementById("callBtn").href = `tel:01893454283`;
