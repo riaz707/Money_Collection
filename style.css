@@ -75,6 +75,49 @@ button {
     background: #e53e3e;
 }
 
+
+/* মডাল বক্সের ভেতর বাটনগুলোর লেআউট ঠিক করা */
+#loginModal .button-row {
+    display: flex;
+    gap: 65px;
+    /* বাটন দুটির মাঝখানের দূরত্ব */
+    margin-top: 6px;
+    justify-content: center;
+}
+
+/* বাটন দুটির সাইজ সমান করা */
+#loginBtn,
+#closeModal {
+    flex: 1;
+    /* এটি বাটন দুটিকে সমান চওড়া করবে */
+    padding: 12px;
+    /* ওপর-নিচে সমান উচ্চতা */
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+    color: white;
+}
+
+/* আলাদা কালার সেট করা */
+#loginBtn {
+    background: #2f855a;
+}
+
+#closeModal {
+    background: #e53e3e;
+}
+
+/* টাচ করলে হালকা ছোট হবে */
+#loginBtn:active,
+#closeModal:active {
+    transform: scale(0.95);
+}
+
+
+
+
 .edit-btn {
     background: #dd6b20;
     font-size: 13px;
@@ -182,7 +225,7 @@ tbody tr:nth-child(even) {
 }
 
 .call {
-    background: #3182ce;
+    background: #397bb9;
 }
 
 .msg {
@@ -536,7 +579,7 @@ th {
 
 /* Zebra Stripe (একটির পর একটি কালার পরিবর্তন) */
 tbody tr:nth-child(even) td {
-    background-color: #f7fafc;
+    background-color: #ebf8fc;
 }
 
 tbody tr:nth-child(odd) td {
@@ -545,7 +588,7 @@ tbody tr:nth-child(odd) td {
 
 /* হোভার করলে হালকা কালার পরিবর্তন */
 tbody tr:hover td {
-    background-color: #edf2f7 !important;
+    background-color: #fff3f1 !important;
 }
 
 /* মোবাইলের জন্য সামান্য অ্যাডজাস্টমেন্ট */
@@ -555,5 +598,105 @@ tbody tr:hover td {
     td {
         padding: 8px 4px;
         font-size: 12px;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*নাম, টাকা এবং তারিখ কলাম: এই দুইটা শুধু প্রয়োজনীয় জায়গা নিবে */
+.col-name,
+.col-amount,
+.col-date {
+    width: 1%;
+    /* এটি কলামকে একদম ছোট করে ফেলে */
+    white-space: nowrap;
+    /* লেখা যেন এক লাইনে থাকে, ভেঙে নিচে না যায় */
+}
+
+/* অ্যাকশন কলামও ছোট থাকবে */
+.admin-col {
+    width: 1%;
+    white-space: nowrap;
+    display: none;
+    /* লগইন ছাড়া লুকানো থাকবে */
+}
+
+/* শেষ কলামের ডানের বর্ডার বাদ দেওয়া */
+th:last-child,
+td:last-child {
+    border-right: none;
+}
+
+/* মোবাইল ভার্সনের জন্য বিশেষ প্যাডিং */
+@media (max-width: 480px) {
+
+    th,
+    td {
+        padding: 8px 5px;
+        /* মোবাইলে জায়গা বাঁচাতে প্যাডিং কমানো */
+        font-size: 12px;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* মেইন কন্টেইনার যেন পুরো জায়গা পায় */
+.button-row.right {
+    display: block;
+    /* ফ্লেক্সের বদলে ব্লক দিয়ে চেষ্টা করো */
+    text-align: right;
+    /* ভেতরের সব এলিমেন্টকে ডানপাশে ঠেলে দিবে */
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+/* অ্যাডমিন বাটন স্পেসিফিক ডিজাইন */
+#adminBtn {
+    background: #2d3748;
+    color: white;
+    padding: 6px 12px;
+    /* ছোট সাইজ */
+    font-size: 12px;
+    /* ফন্ট ছোট */
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    display: inline-block;
+    /* লেখা অনুযায়ী ছোট থাকবে */
+    width: auto;
+    /* পুরো জায়গা নিবে না */
+    font-weight: 600;
+}
+
+/* মোবাইলের জন্য আরও ছোট টাচ-আপ */
+@media (max-width: 480px) {
+    #adminBtn {
+        font-size: 11px;
+        padding: 5px 10px;
     }
 }
