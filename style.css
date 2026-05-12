@@ -784,12 +784,14 @@ td:last-child {
 }
 
 .success {
+    /* সবুজ */
     background-color: #48bb78;
+    width: auto;
 }
 
-/* সবুজ */
 .error {
+    /* লাল */
     background-color: #f56565;
-}
+    width: auto;
 
-/* লাল */
+}
