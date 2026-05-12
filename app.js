@@ -1,6 +1,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
+// Firebase Configuration
 const firebaseConfig = {
     apiKey: "AIzaSyDmOGNtpssOPd9752gHWRR2c4QJN28CEc8",
     authDomain: "money-callection.firebaseapp.com",
@@ -10,77 +12,79 @@ const firebaseConfig = {
     appId: "1:741567569972:web:193d6f62b3528a095daa61"
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
 
-const PASS = "181058";
+// Global Variables
 let isAdmin = false;
 let globalData = [];
 let currentEditId = null;
 
+// DOM Elements
 const el = {
     income: document.getElementById("incomeList"),
     expense: document.getElementById("expenseList"),
     incomeTotal: document.getElementById("incomeTotal"),
     expenseTotal: document.getElementById("expenseTotal"),
     balance: document.getElementById("balance"),
-    form: document.getElementById("formBox"),
-    modal: document.getElementById("loginModal"),
+    formBox: document.getElementById("formBox"),
+    loginModal: document.getElementById("loginModal"),
     editModal: document.getElementById("editModal"),
     adminBtn: document.getElementById("adminBtn"),
     logoutBtn: document.getElementById("logoutBtn"),
     toast: document.getElementById("toast")
 };
 
-// Admin Login Logic
-el.adminBtn.onclick = () => el.modal.style.display = "flex";
-el.logoutBtn.onclick = () => location.reload();
-
-document.getElementById("loginBtn").onclick = () => {
-    if (document.getElementById("pass").value === PASS) {
+// --- ১. অথেনটিকেশন চেক (অটো-লগইন এবং UI কন্ট্রোল) ---
+onAuthStateChanged(auth, (user) => {
+    if (user) {
         isAdmin = true;
-        el.form.style.display = "block";
-        el.logoutBtn.style.display = "inline-block";
         el.adminBtn.style.display = "none";
-        el.modal.style.display = "none";
-        render(globalData); // লগইন করার পর সব রি-রেন্ডার হবে
+        el.logoutBtn.style.display = "inline-block";
+        el.formBox.style.display = "block";
     } else {
-        alert("ভুল পাসওয়ার্ড!");
+        isAdmin = false;
+        el.adminBtn.style.display = "inline-block";
+        el.logoutBtn.style.display = "none";
+        el.formBox.style.display = "none";
+    }
+    render(globalData); // ডাটা রি-রেন্ডার হবে (অ্যাকশন বাটনসহ বা ছাড়া)
+});
+
+// --- ২. লগইন লজিক ---
+document.getElementById("loginBtn").onclick = async () => {
+    const email = document.getElementById("adminEmail").value;
+    const password = document.getElementById("adminPass").value;
+
+    if (!email || !password) return alert("ইমেল এবং পাসওয়ার্ড দিন!");
+
+    try {
+        await signInWithEmailAndPassword(auth, email, password);
+        alert("সফলভাবে লগইন হয়েছে!");
+        el.loginModal.style.display = "none";
+    } catch (error) {
+        alert("ভুল ইমেল বা পাসওয়ার্ড!");
+        console.error(error.message);
     }
 };
 
-document.getElementById("closeModal").onclick = () => el.modal.style.display = "none";
-document.getElementById("closeEditModal").onclick = () => el.editModal.style.display = "none";
-
-// Add Data (Validation সহ)
-document.getElementById("saveBtn").onclick = async () => {
-    const name = document.getElementById("name").value;
-    const amount = document.getElementById("amount").value;
-    const date = document.getElementById("date").value;
-    const type = document.getElementById("type").value;
-
-    if (!name || !amount || !date) {
-        alert("সবগুলো ঘর পূরণ করুন!");
-        return;
-    }
-
-    await addDoc(collection(db, "moneyList"), {
-        name,
-        amount: Number(amount),
-        date,
-        type,
-        time: serverTimestamp()
+// --- ৩. লগআউট লজিক ---
+el.logoutBtn.onclick = () => {
+    signOut(auth).then(() => {
+        // এখানে আগে alert("লগআউট সফল!") ছিল, সেটা ফেলে দেওয়া হয়েছে
+        location.reload();
+    }).catch((error) => {
+        console.error("Logout error:", error);
     });
-
-    document.getElementById("name").value = "";
-    document.getElementById("amount").value = "";
 };
 
-// Real-time Listener
+// --- ৪. রিয়েল-টাইম ডেটা লিসেনার ---
 onSnapshot(collection(db, "moneyList"), snap => {
     globalData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-    // সর্টিং: তারিখ (নতুন আগে), একই তারিখ হলে এন্ট্রি টাইম (নতুন আগে)
+    // সর্টিং (তারিখ অনুযায়ী নতুন আগে)
     globalData.sort((a, b) => {
         if (b.date !== a.date) return new Date(b.date) - new Date(a.date);
         return (b.time?.seconds || 0) - (a.time?.seconds || 0);
@@ -89,15 +93,16 @@ onSnapshot(collection(db, "moneyList"), snap => {
     render(globalData);
 });
 
-// Render Function
+// --- ৫. রেন্ডার ফাংশন ---
 function render(data) {
     el.income.innerHTML = "";
     el.expense.innerHTML = "";
     let inTotal = 0, exTotal = 0;
 
     data.forEach(d => {
+        // তারিখ ফরম্যাট করা (DD-MM-YYYY)
         const dObj = new Date(d.date);
-        const fDate = `${String(dObj.getDate()).padStart(2, '0')}-${String(dObj.getMonth() + 1).padStart(2, '0')}-${dObj.getFullYear()}`;
+        const fDate = d.date ? `${String(dObj.getDate()).padStart(2, '0')}-${String(dObj.getMonth() + 1).padStart(2, '0')}-${dObj.getFullYear()}` : "";
 
         const row = document.createElement("tr");
         row.innerHTML = `
@@ -121,14 +126,18 @@ function render(data) {
 
     el.incomeTotal.innerText = inTotal;
     el.expenseTotal.innerText = exTotal;
-    el.balance.innerHTML = `<h3>💵 বর্তমান ব্যালেন্স: ৳ ${inTotal - exTotal}</h3>`;
+    el.balance.innerText = `৳ ${inTotal - exTotal}`;
 
-    // লগইন অবস্থায় থাকলে হেডার এবং বডির Action কলাম দেখানো হবে
+    // টেবিল হেডারের "অ্যাকশন" কলাম কন্ট্রোল
     document.querySelectorAll(".admin-col").forEach(col => {
         col.style.display = isAdmin ? "table-cell" : "none";
     });
 
-    // Delete Logic (Permission সহ)
+    attachAdminEvents();
+}
+
+// --- ৬. এডিট এবং ডিলিট ইভেন্ট লিসেনার ---
+function attachAdminEvents() {
     document.querySelectorAll(".del-btn").forEach(btn => {
         btn.onclick = async (e) => {
             const id = e.currentTarget.dataset.id;
@@ -138,7 +147,6 @@ function render(data) {
         };
     });
 
-    // Edit Logic
     document.querySelectorAll(".edit-btn").forEach(btn => {
         btn.onclick = (e) => {
             const id = e.currentTarget.dataset.id;
@@ -153,46 +161,47 @@ function render(data) {
     });
 }
 
-// Update Data (পজিশন চেঞ্জ হবে না)
+// --- ৭. ডেটা যোগ এবং আপডেট ---
+document.getElementById("saveBtn").onclick = async () => {
+    const name = document.getElementById("name").value;
+    const amount = document.getElementById("amount").value;
+    const date = document.getElementById("date").value;
+    const type = document.getElementById("type").value;
+
+    if (!name || !amount || !date) return alert("সবগুলো ঘর পূরণ করুন!");
+
+    try {
+        await addDoc(collection(db, "moneyList"), {
+            name, amount: Number(amount), date, type, time: serverTimestamp()
+        });
+        document.getElementById("name").value = "";
+        document.getElementById("amount").value = "";
+    } catch (e) {
+        alert("ডেটা যোগ করার অনুমতি নেই!");
+    }
+};
+
 document.getElementById("updateBtn").onclick = async () => {
     const name = document.getElementById("editName").value;
     const amount = document.getElementById("editAmount").value;
     const date = document.getElementById("editDate").value;
     const type = document.getElementById("editType").value;
 
-    if (!name || !amount || !date) return alert("তথ্য পূরণ করুন!");
-
     await updateDoc(doc(db, "moneyList", currentEditId), {
         name, amount: Number(amount), date, type
     });
-
     el.editModal.style.display = "none";
 };
 
-// Copy & Footer System
-// document.getElementById("phoneNumber").onclick = () => {
-//     navigator.clipboard.writeText("01893454283");
-//     el.toast.classList.add("show");
-//     setTimeout(() => el.toast.classList.remove("show"), 2000);
-// };
+// --- ৮. UI কন্ট্রোল (মডাল এবং কপি) ---
+el.adminBtn.onclick = () => el.loginModal.style.display = "flex";
+document.getElementById("closeModal").onclick = () => el.loginModal.style.display = "none";
+document.getElementById("closeEditModal").onclick = () => el.editModal.style.display = "none";
 
-
-// কপি ফাংশন
 const copyNumber = () => {
-    const number = "01893454283";
-    navigator.clipboard.writeText(number).then(() => {
-        // তোমার তৈরি করা সেই প্রফেশনাল টোস্ট পপআপ দেখাবে
-        const toast = document.getElementById("toast");
-        toast.classList.add("show");
-        setTimeout(() => toast.classList.remove("show"), 2000);
-    }).catch(err => {
-        console.error("Copy failed", err);
+    navigator.clipboard.writeText("01893454283").then(() => {
+        el.toast.classList.add("show");
+        setTimeout(() => el.toast.classList.remove("show"), 2000);
     });
 };
-
-// আইকন এরিয়া এবং নম্বর—উভয় জায়গাতেই ক্লিক করলে কপি হবে
 document.getElementById("paymentCopyArea").onclick = copyNumber;
-
-
-// document.getElementById("whatsappBtn").href = `https://wa.me/8801893454283`;
-// document.getElementById("callBtn").href = `tel:01893454283`;

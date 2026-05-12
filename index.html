@@ -14,7 +14,7 @@
         <h2>💰 টাকা ম্যানেজমেন্ট</h2>
 
         <div class="button-row right">
-            <button id="adminBtn" class="admin-btn">🔐 Admin Login</button>
+            <button id="adminBtn" class="admin-btn">🔐 Login</button>
             <button id="logoutBtn" class="delete-btn" style="display:none;">Logout</button>
         </div>
 
@@ -68,7 +68,8 @@
         </div>
 
         <div class="section balance">
-            <h3>খরচের পর অবশিষ্ট ব্যালেন্স: <span id="balance">0</span></h3>
+            <h3>খরচের পর অবশিষ্ট ব্যালেন্স: </h3> <br>
+            <h3>💵 বর্তমান ব্যালেন্স: <span id="balance">0</span></h3>
         </div>
 
         <!-- তোমার দেওয়া ফুটার ডিজাইন -->
@@ -143,7 +144,7 @@
     </div>
 
     <!-- মডাল -->
-    <div class="modal" id="loginModal">
+    <!-- <div class="modal" id="loginModal">
         <div class="modal-box">
             <h2>Admin Login</h2>
             <input type="password" id="pass" placeholder="Password">
@@ -151,7 +152,26 @@
             <button id="loginBtn" class="add-btn">Login</button>
 
         </div>
+    </div> -->
+
+    <div class="modal" id="loginModal">
+        <div class="modal-box">
+            <h3>🔐 Admin Login</h3>
+
+            <input type="email" id="adminEmail" placeholder="আপনার ইমেল">
+
+            <input type="password" id="adminPass" placeholder="পাসওয়ার্ড">
+
+            <div class="button-row">
+                <button id="closeModal">Close</button>
+                <button id="loginBtn">Login</button>
+            </div>
+        </div>
     </div>
+
+    <button id="logoutBtn" style="display:none; background:#e53e3e;">Logout</button>
+
+
 
     <div class="modal" id="editModal">
         <div class="modal-box">
@@ -163,8 +183,8 @@
                 <option value="income">টাকা জমা</option>
                 <option value="expense">টাকা খরচ</option>
             </select>
-            <button id="updateBtn" class="add-btn">Update</button>
             <button id="closeEditModal" class="delete-btn">Cancel</button>
+            <button id="updateBtn" class="add-btn">Update</button>
         </div>
     </div>
 

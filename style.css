@@ -494,6 +494,28 @@ tbody tr:nth-child(even) {
     color: white;
 }
 
+
+
+#updateBtn,
+#closeEditModal {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 45px;
+    /* নির্দিষ্ট উইডথ (সমান হবে) */
+    height: 32px;
+    /* নির্দিষ্ট হাইট */
+    padding: 0 !important;
+    font-size: 11px;
+    font-weight: bold;
+    border-radius: 6px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: none;
+    color: white;
+}
+
+
 .edit-btn {
     background: #dd6b20;
     margin-right: 5px;
@@ -663,8 +685,6 @@ td:last-child {
 
 
 
-
-
 /* মেইন কন্টেইনার যেন পুরো জায়গা পায় */
 .button-row.right {
     display: block;
@@ -677,7 +697,7 @@ td:last-child {
 
 /* অ্যাডমিন বাটন স্পেসিফিক ডিজাইন */
 #adminBtn {
-    background: #2d3748;
+    background: #005fd5;
     color: white;
     padding: 6px 12px;
     /* ছোট সাইজ */
@@ -698,5 +718,38 @@ td:last-child {
     #adminBtn {
         font-size: 11px;
         padding: 5px 10px;
+    }
+}
+
+
+
+
+
+/* মডালের ভেতরের বাটন রো ঠিক করার জন্য */
+#loginModal .button-row {
+    display: flex !important;
+    flex-direction: row !important;
+    /* পাশাপাশি রাখার জন্য */
+    gap: 10px !important;
+    /* গ্যাপ কমানোর জন্য */
+    justify-content: center !important;
+    margin-top: 15px !important;
+}
+
+#loginModal .button-row button {
+    flex: 1 !important;
+    /* বাটনগুলো সমান বড় হবে */
+    padding: 10px !important;
+    margin: 0 !important;
+    /* বাড়তি গ্যাপ রিমুভ করবে */
+    min-width: 100px !important;
+    /* খুব বেশি ছোট হবে না */
+}
+
+/* মোবাইল ভার্সন স্পেসিফিক */
+@media (max-width: 480px) {
+    #loginModal .modal-box {
+        width: 90% !important;
+        padding: 20px !important;
     }
 }
