@@ -53,24 +53,6 @@ onAuthStateChanged(auth, (user) => {
     render(globalData); // ডাটা রি-রেন্ডার হবে (অ্যাকশন বাটনসহ বা ছাড়া)
 });
 
-// --- ২. লগইন লজিক ---
-// document.getElementById("loginBtn").onclick = async () => {
-//     const email = document.getElementById("adminEmail").value;
-//     const password = document.getElementById("adminPass").value;
-
-//     if (!email || !password) return alert("ইমেল এবং পাসওয়ার্ড দিন!");
-
-//     try {
-//         await signInWithEmailAndPassword(auth, email, password);
-//         alert("সফলভাবে লগইন হয়েছে!");
-//         el.loginModal.style.display = "none";
-//     } catch (error) {
-//         alert("ভুল ইমেল বা পাসওয়ার্ড!");
-//         console.error(error.message);
-//     }
-// };
-
-
 
 
 
@@ -85,14 +67,14 @@ document.getElementById("loginBtn").onclick = async () => {
 
     try {
         await signInWithEmailAndPassword(auth, email, password);
-        showMsg("✅ সফলভাবে লগইন হয়েছে!", "success"); // ডায়নামিক সাকসেস মেসেজ
+        showMsg("✅ লগইন সফল হয়েছে!", "success"); // ডায়নামিক সাকসেস মেসেজ
         el.loginModal.style.display = "none";
     } catch (error) {
         // ভুল পাসওয়ার্ড বা ইমেলের জন্য স্পেসিফিক মেসেজ
         if (error.code === "auth/invalid-credential") {
-            showMsg("❌ ভুল ইমেল বা পাসওয়ার্ড!", "error");
+            showMsg("ভুল ইমেল বা পাসওয়ার্ড!", "error");
         } else {
-            showMsg("🚨 সমস্যা হয়েছে: " + error.message, "error");
+            showMsg(" ✉️ ভুল ইমেল! ", "error");
         }
     }
 };
