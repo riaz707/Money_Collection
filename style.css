@@ -760,3 +760,36 @@ td:last-child {
         padding: 20px !important;
     }
 }
+
+
+
+
+
+
+
+
+
+/* ডায়নামিক মেসেজ বক্সের স্টাইল */
+.dynamic-msg {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 12px 25px;
+    border-radius: 8px;
+    color: white;
+    font-weight: bold;
+    z-index: 10000;
+    transition: 0.5s;
+    display: none;
+}
+
+.success {
+    background-color: #48bb78;
+}
+
+/* সবুজ */
+.error {
+    background-color: #f56565;
+}
+
+/* লাল */

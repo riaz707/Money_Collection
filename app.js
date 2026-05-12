@@ -54,21 +54,52 @@ onAuthStateChanged(auth, (user) => {
 });
 
 // --- ২. লগইন লজিক ---
+// document.getElementById("loginBtn").onclick = async () => {
+//     const email = document.getElementById("adminEmail").value;
+//     const password = document.getElementById("adminPass").value;
+
+//     if (!email || !password) return alert("ইমেল এবং পাসওয়ার্ড দিন!");
+
+//     try {
+//         await signInWithEmailAndPassword(auth, email, password);
+//         alert("সফলভাবে লগইন হয়েছে!");
+//         el.loginModal.style.display = "none";
+//     } catch (error) {
+//         alert("ভুল ইমেল বা পাসওয়ার্ড!");
+//         console.error(error.message);
+//     }
+// };
+
+
+
+
+
 document.getElementById("loginBtn").onclick = async () => {
     const email = document.getElementById("adminEmail").value;
     const password = document.getElementById("adminPass").value;
 
-    if (!email || !password) return alert("ইমেল এবং পাসওয়ার্ড দিন!");
+    if (!email || !password) {
+        showMsg("⚠️ ইমেল এবং পাসওয়ার্ড দিন!", "error");
+        return;
+    }
 
     try {
         await signInWithEmailAndPassword(auth, email, password);
-        alert("সফলভাবে লগইন হয়েছে!");
+        showMsg("✅ সফলভাবে লগইন হয়েছে!", "success"); // ডায়নামিক সাকসেস মেসেজ
         el.loginModal.style.display = "none";
     } catch (error) {
-        alert("ভুল ইমেল বা পাসওয়ার্ড!");
-        console.error(error.message);
+        // ভুল পাসওয়ার্ড বা ইমেলের জন্য স্পেসিফিক মেসেজ
+        if (error.code === "auth/invalid-credential") {
+            showMsg("❌ ভুল ইমেল বা পাসওয়ার্ড!", "error");
+        } else {
+            showMsg("🚨 সমস্যা হয়েছে: " + error.message, "error");
+        }
     }
 };
+
+
+
+
 
 // --- ৩. লগআউট লজিক ---
 el.logoutBtn.onclick = () => {
@@ -147,6 +178,27 @@ function attachAdminEvents() {
         };
     });
 
+
+
+
+    async function deleteItem(id) {
+        // ব্রাউজারের ডিফল্ট কনফার্মেশন বক্স (এটি সবচেয়ে সহজ ও নিরাপদ)
+        const proceed = confirm("🗑️ আপনি কি নিশ্চিতভাবে এটি ডিলিট করতে চান?");
+
+        if (proceed) {
+            try {
+                await deleteDoc(doc(db, "moneyList", id));
+                showMsg("🗑️ ডিলিট করা হয়েছে!", "success");
+            } catch (e) {
+                showMsg("⛔ ডিলিট করার অনুমতি নেই!", "error");
+            }
+        }
+    }
+
+
+
+
+
     document.querySelectorAll(".edit-btn").forEach(btn => {
         btn.onclick = (e) => {
             const id = e.currentTarget.dataset.id;
@@ -159,8 +211,7 @@ function attachAdminEvents() {
             el.editModal.style.display = "flex";
         };
     });
-}
-
+};
 // --- ৭. ডেটা যোগ এবং আপডেট ---
 document.getElementById("saveBtn").onclick = async () => {
     const name = document.getElementById("name").value;
@@ -205,3 +256,21 @@ const copyNumber = () => {
     });
 };
 document.getElementById("paymentCopyArea").onclick = copyNumber;
+
+
+
+
+
+
+
+
+// সব ধরনের মেসেজ দেখানোর কমন ফাংশন
+function showMsg(text, type) {
+    const msgBox = document.getElementById("toast"); // তোমার আগে থেকেই toast আছে
+    msgBox.innerText = text;
+    msgBox.className = `toast show ${type}`; // success বা error ক্লাস যোগ হবে
+
+    setTimeout(() => {
+        msgBox.classList.remove("show");
+    }, 3000);
+}
