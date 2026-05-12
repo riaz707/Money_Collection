@@ -783,15 +783,31 @@ td:last-child {
     display: none;
 }
 
+
+.toast {
+    /* তোমার আগের সব কোড ঠিক থাকবে, শুধু নিচের ৩টি লাইন যোগ করো বা আপডেট করো */
+    white-space: nowrap;
+    /* এটি টেক্সটকে ভেঙে নিচে নামতে দিবে না */
+    width: max-content;
+    /* টেক্সট যতটুকু লম্বা, বক্সটিও ততটুকুই হবে */
+    max-width: 90vw;
+    /* মোবাইলে স্ক্রিনের বাইরে যেন না যায় সেজন্য সেফটি */
+}
+
+
 .success {
-    /* সবুজ */
     background-color: #48bb78;
-    width: auto;
+    border-radius: 12px !important;
+    width: auto !important;
+    padding: 1% 3% !important;
 }
 
+/* সবুজ */
 .error {
-    /* লাল */
-    background-color: #f56565;
-    width: auto;
-
+    background-color: #c94040;
+    border-radius: 12px !important;
+    width: auto !important;
+    padding: 1% 3% !important;
 }
+
+/* লাল */
