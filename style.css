@@ -820,3 +820,157 @@ td:last-child {
 }
 
 /* লাল */
+
+/* ===== নোট ফিচার ===== */
+
+/* টেবিলের নোট কলাম */
+.col-note {
+    width: 1%;
+    white-space: nowrap;
+    text-align: center;
+}
+
+textarea {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #cbd5e0;
+    margin-top: 10px;
+    outline: none;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 14px;
+    resize: vertical;
+    min-height: 70px;
+    color: #2d3748;
+}
+
+textarea:focus {
+    border-color: #4299e1;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+}
+
+/* ভিউ বাটন */
+.note-view-btn {
+    background: linear-gradient(135deg, #4299e1, #2b6cb0);
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 2px 4px rgba(66, 153, 225, 0.3);
+}
+
+.note-view-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(66, 153, 225, 0.4);
+}
+
+.note-view-btn:active {
+    transform: scale(0.93);
+}
+
+/* নোট নেই চিহ্ন */
+.no-note {
+    color: #cbd5e0;
+    font-size: 16px;
+}
+
+/* নোট ভিউ মোডাল বক্স */
+.note-view-box {
+    max-width: 420px;
+    width: 92%;
+    text-align: left;
+    padding: 25px;
+}
+
+.note-view-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #ebf8ff;
+}
+
+.note-view-header .note-view-icon {
+    font-size: 26px;
+}
+
+.note-view-header h3 {
+    color: #2b6cb0;
+    font-size: 18px;
+    margin: 0;
+}
+
+/* মেটা তথ্য (নাম, টাকা, তারিখ) */
+.note-view-meta {
+    background: #f7fafc;
+    border-radius: 10px;
+    padding: 12px 15px;
+    margin-bottom: 15px;
+    border: 1px solid #e2e8f0;
+}
+
+.note-meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+    font-size: 14px;
+    border-bottom: 1px dashed #e2e8f0;
+    color: #4a5568;
+}
+
+.note-meta-row:last-child {
+    border-bottom: none;
+}
+
+.note-meta-label {
+    font-weight: bold;
+    color: #2d3748;
+    min-width: 55px;
+}
+
+/* নোট কন্টেন্ট */
+.note-view-content {
+    background: #fffbeb;
+    border: 1px solid #fbd38d;
+    border-left: 4px solid #ed8936;
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 15px;
+    color: #744210;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    word-break: break-word;
+    min-height: 70px;
+}
+
+/* Edit মোডালে নোট textarea */
+#editNote {
+    border-color: #bee3f8;
+}
+
+#editNote:focus {
+    border-color: #4299e1;
+}
+
+/* মোবাইল */
+@media (max-width: 480px) {
+    .note-view-btn {
+        padding: 4px 8px;
+        font-size: 11px;
+    }
+
+    .note-view-box {
+        padding: 18px;
+    }
+
+    .note-view-content {
+        font-size: 14px;
+    }
+}

@@ -28,6 +28,7 @@ const el = {
     formBox: document.getElementById("formBox"),
     loginModal: document.getElementById("loginModal"),
     editModal: document.getElementById("editModal"),
+    noteViewModal: document.getElementById("noteViewModal"),
     adminBtn: document.getElementById("adminBtn"),
     logoutBtn: document.getElementById("logoutBtn"),
     toast: document.getElementById("toast")
@@ -106,11 +107,18 @@ function render(data) {
         const dObj = new Date(d.date);
         const fDate = d.date ? `${String(dObj.getDate()).padStart(2, '0')}-${String(dObj.getMonth() + 1).padStart(2, '0')}-${dObj.getFullYear()}` : "";
 
+        // নোট সেল তৈরি
+        const hasNote = d.note && d.note.trim() !== "";
+        const noteCell = hasNote
+            ? `<td class="col-note"><button class="note-view-btn" data-id="${d.id}">📄 ভিউ</button></td>`
+            : `<td class="col-note"><span class="no-note">—</span></td>`;
+
         const row = document.createElement("tr");
         row.innerHTML = `
             <td>${d.name}</td>
             <td>${d.amount}</td>
             <td>${fDate}</td>
+            ${noteCell}
             <td class="admin-col" style="display: ${isAdmin ? 'table-cell' : 'none'}">
                 <button class="edit-btn" data-id="${d.id}">Edit</button>
                 <button class="del-btn" data-id="${d.id}">Delete</button>
@@ -135,9 +143,37 @@ function render(data) {
     });
 
     attachAdminEvents();
+    attachNoteViewEvents();
 }
 
-// --- ৭. ইভেন্ট লিসেনার (Edit & Delete) ---
+// --- ৭. নোট ভিউ ইভেন্ট (সবাই দেখতে পারবে) ---
+function attachNoteViewEvents() {
+    document.querySelectorAll(".note-view-btn").forEach(btn => {
+        btn.onclick = (e) => {
+            const id = e.currentTarget.dataset.id;
+            const item = globalData.find(x => x.id === id);
+            if (!item) return;
+
+            const dObj = new Date(item.date);
+            const fDate = item.date
+                ? `${String(dObj.getDate()).padStart(2, '0')}-${String(dObj.getMonth() + 1).padStart(2, '0')}-${dObj.getFullYear()}`
+                : "তারিখ নেই";
+
+            const typeLabel = item.type === "income" ? "🟢 টাকা জমা" : "🔴 টাকা খরচ";
+
+            document.getElementById("noteViewMeta").innerHTML = `
+                <div class="note-meta-row"><span class="note-meta-label">নাম:</span> <span>${item.name}</span></div>
+                <div class="note-meta-row"><span class="note-meta-label">টাকা:</span> <span>৳ ${item.amount}</span></div>
+                <div class="note-meta-row"><span class="note-meta-label">তারিখ:</span> <span>${fDate}</span></div>
+                <div class="note-meta-row"><span class="note-meta-label">ধরন:</span> <span>${typeLabel}</span></div>
+            `;
+            document.getElementById("noteViewContent").innerText = item.note || "কোনো নোট নেই।";
+            el.noteViewModal.style.display = "flex";
+        };
+    });
+}
+
+// --- ৮. ইভেন্ট লিসেনার (Edit & Delete) ---
 function attachAdminEvents() {
     // ডিলিট লজিক
     document.querySelectorAll(".del-btn").forEach(btn => {
@@ -164,17 +200,19 @@ function attachAdminEvents() {
             document.getElementById("editAmount").value = item.amount;
             document.getElementById("editDate").value = item.date;
             document.getElementById("editType").value = item.type;
+            document.getElementById("editNote").value = item.note || "";
             el.editModal.style.display = "flex";
         };
     });
 }
 
-// --- ৮. ডেটা যোগ ও আপডেট ---
+// --- ৯. ডেটা যোগ ---
 document.getElementById("saveBtn").onclick = async () => {
     const name = document.getElementById("name").value;
     const amount = document.getElementById("amount").value;
     const date = document.getElementById("date").value;
     const type = document.getElementById("type").value;
+    const note = document.getElementById("note").value.trim();
 
     if (!name || !amount || !date) {
         alert("সবগুলো ঘর পূরণ করুন!");
@@ -183,37 +221,46 @@ document.getElementById("saveBtn").onclick = async () => {
 
     try {
         await addDoc(collection(db, "moneyList"), {
-            name, amount: Number(amount), date, type, time: serverTimestamp()
+            name, amount: Number(amount), date, type, note, time: serverTimestamp()
         });
         document.getElementById("name").value = "";
         document.getElementById("amount").value = "";
-        showMsg("✅ সফলভাবে যোগ হয়েছে!", "success");
+        document.getElementById("note").value = "";
+        showMsg("✅ সফলভাবে যোগ হয়েছে!", "success");
     } catch (e) {
-        showMsg("❌ যোগ করা সম্ভব হয়নি!", "error");
+        showMsg("❌ যোগ করা সম্ভব হয়নি!", "error");
     }
 };
 
+// --- ১০. ডেটা আপডেট ---
 document.getElementById("updateBtn").onclick = async () => {
     const name = document.getElementById("editName").value;
     const amount = document.getElementById("editAmount").value;
     const date = document.getElementById("editDate").value;
     const type = document.getElementById("editType").value;
+    const note = document.getElementById("editNote").value.trim();
 
     try {
         await updateDoc(doc(db, "moneyList", currentEditId), {
-            name, amount: Number(amount), date, type
+            name, amount: Number(amount), date, type, note
         });
         el.editModal.style.display = "none";
-        showMsg("✅ আপডেট সফল হয়েছে!", "success");
+        showMsg("✅ আপডেট সফল হয়েছে!", "success");
     } catch (err) {
-        showMsg("❌ আপডেট হয়নি!", "error");
+        showMsg("❌ আপডেট হয়নি!", "error");
     }
 };
 
-// --- ৯. UI কন্ট্রোল ---
+// --- ১১. UI কন্ট্রোল ---
 el.adminBtn.onclick = () => el.loginModal.style.display = "flex";
 document.getElementById("closeModal").onclick = () => el.loginModal.style.display = "none";
 document.getElementById("closeEditModal").onclick = () => el.editModal.style.display = "none";
+document.getElementById("closeNoteView").onclick = () => el.noteViewModal.style.display = "none";
+
+// নোট মোডাল বাইরে ক্লিক করলে বন্ধ হবে
+el.noteViewModal.onclick = (e) => {
+    if (e.target === el.noteViewModal) el.noteViewModal.style.display = "none";
+};
 
 document.getElementById("paymentCopyArea").onclick = () => {
     navigator.clipboard.writeText("01893454283").then(() => {

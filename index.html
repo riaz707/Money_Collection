@@ -18,26 +18,17 @@
             <button id="logoutBtn" class="delete-btn" style="display:none;">Logout</button>
         </div>
 
-
         <div class="modal" id="loginModal">
             <div class="modal-box">
                 <h3>🔐 Admin Login</h3>
-
                 <input type="email" id="adminEmail" placeholder="আপনার ইমেল">
-
-                <input type="password" id="adminPass" placeholder="পাসওয়ার্ড">
-
+                <input type="password" id="adminPass" placeholder="পাসওয়ার্ড">
                 <div class="button-row">
                     <button id="closeModal">Close</button>
                     <button id="loginBtn">Login</button>
                 </div>
             </div>
         </div>
-
-        <button id="logoutBtn" style="display:none; background:#e53e3e;">Logout</button>
-
-
-
 
         <!-- ইনপুট ফর্ম -->
         <div id="formBox" class="section" style="display:none;">
@@ -48,6 +39,7 @@
                 <option value="income">টাকা জমা</option>
                 <option value="expense">টাকা খরচ</option>
             </select>
+            <textarea id="note" placeholder="📝 নোট লিখুন (ঐচ্ছিক)" rows="2"></textarea>
             <div class="button-row">
                 <button id="saveBtn" class="add-btn">যোগ করুন</button>
             </div>
@@ -62,6 +54,7 @@
                         <th class="col-name">নাম</th>
                         <th class="col-amount">টাকা</th>
                         <th class="col-date">তারিখ</th>
+                        <th class="col-note">নোট</th>
                         <th class="admin-col">অ্যাকশন</th>
                     </tr>
                 </thead>
@@ -79,6 +72,7 @@
                         <th class="col-name">নাম</th>
                         <th class="col-amount">টাকা</th>
                         <th class="col-date">তারিখ</th>
+                        <th class="col-note">নোট</th>
                         <th class="admin-col">অ্যাকশন</th>
                     </tr>
                 </thead>
@@ -92,10 +86,9 @@
             <h3>💵 বর্তমান ব্যালেন্স: <span id="balance">0</span></h3>
         </div>
 
-        <!-- তোমার দেওয়া ফুটার ডিজাইন -->
+        <!-- ফুটার -->
         <div class="footer">
             <div style="font-size:18px;font-weight:bold;margin-bottom:15px;">💳 পেমেন্ট করুন</div>
-
 
             <div id="paymentCopyArea" style="cursor:pointer;">
                 <div class="payment-icons">
@@ -103,39 +96,28 @@
                     <img src="/image/Nagad-Logo.svg" alt="Nagad">
                     <img src="/image/rocket.png" alt="Rocket">
                 </div>
-
                 <div id="phoneNumber" style="font-size:22px;font-weight:bold;margin-top:10px; color: #2b6cb0;">
                     📱 01893454283 <span style="color: gray; font-size: small;">📋Copy</span>
                 </div>
             </div>
 
-
             <div id="phoneNumber1" style="color:green;font-weight:bold;">
                 বিকাশ / নগদ / রকেট
             </div>
-
-            <div style="color:gray;">
-                (পার্সোনাল নাম্বার)
-            </div>
-
+            <div style="color:gray;">(পার্সোনাল নাম্বার)</div>
             <div style="margin-top:10px;font-size:14px;color:#ff0000;">
-
-                টাকা পাঠানোর পর 📩 Admin কে জানিয়ে দিন ।
-
+                টাকা পাঠানোর পর 📩 Admin কে জানিয়ে দিন ।
             </div>
 
             <div style="margin-top:15px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
-
                 <a href="https://m.me/r.Riaz99" target="_blank"
                     style="background:#1877F2;color:white;padding:10px;border-radius:10px;text-decoration:none;flex:1;text-align:center;">💬
                     <p>Messenger</p>
                 </a>
-
                 <a href="tel:01893454283"
                     style="background:#2563eb;color:white;padding:10px;border-radius:10px;text-decoration:none;flex:1;text-align:center;">📞
                     <p>Call</p>
                 </a>
-
                 <a href="https://wa.me/8801893454283" target="_blank"
                     style="background:#25D366;color:white;padding:10px;border-radius:10px;text-decoration:none;flex:1;text-align:center;">💬
                     <p>WhatsApp</p>
@@ -144,8 +126,7 @@
         </div>
     </div>
 
-
-
+    <!-- Edit Modal -->
     <div class="modal" id="editModal">
         <div class="modal-box">
             <h2>Edit Info</h2>
@@ -156,12 +137,26 @@
                 <option value="income">টাকা জমা</option>
                 <option value="expense">টাকা খরচ</option>
             </select>
+            <textarea id="editNote" placeholder="📝 নোট লিখুন (ঐচ্ছিক)" rows="3"></textarea>
             <button id="closeEditModal" class="delete-btn">Cancel</button>
             <button id="updateBtn" class="add-btn">Update</button>
         </div>
     </div>
 
-    <div id="toast" class="toast">নাম্বার কপি হয়েছে!</div>
+    <!-- Note View Modal (User দেখার জন্য) -->
+    <div class="modal" id="noteViewModal">
+        <div class="modal-box note-view-box">
+            <div class="note-view-header">
+                <span class="note-view-icon">📝</span>
+                <h3>নোট বিস্তারিত</h3>
+            </div>
+            <div class="note-view-meta" id="noteViewMeta"></div>
+            <div class="note-view-content" id="noteViewContent"></div>
+            <button id="closeNoteView" class="add-btn" style="margin-top:15px;width:100%;">বন্ধ করুন</button>
+        </div>
+    </div>
+
+    <div id="toast" class="toast">নাম্বার কপি হয়েছে!</div>
 
     <script type="module" src="app.js"></script>
 </body>
