@@ -1152,139 +1152,176 @@ function attachTableEvents(tbody) {
 
 // ===== SINGLE RECEIPT PDF (বাংলা সাপোর্ট সহ) =====
 function drawSignatures(ctx, canvasWidth, y) {
-    // Signature section background
+    const FONT = "'Hind Siliguri', 'Noto Sans Bengali', sans-serif";
+    // scale all measurements relative to canvasWidth so it works for both
+    // receipt (900px) and list-PDF (1985px) canvases
+    const sc = canvasWidth / 900;
+    const pad = 46 * sc;
+    const boxH = 170 * sc;
+
+    // Section background
     ctx.fillStyle = "#f8fafc";
     ctx.beginPath();
-    ctx.roundRect(30, y, canvasWidth - 60, 130, 10);
+    ctx.roundRect(pad, y, canvasWidth - pad * 2, boxH, 14 * sc);
     ctx.fill();
     ctx.strokeStyle = "#e2e8f0";
-    ctx.lineWidth = 1;
+    ctx.lineWidth = 1.5 * sc;
     ctx.stroke();
 
-    // Left signature — Admin
-    ctx.fillStyle = "#4a5568";
-    ctx.font = "14px 'Hind Siliguri', sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText("অ্যাডমিনের স্বাক্ষর", 150, y + 28);
-    // signature line
-    ctx.strokeStyle = "#2d3748";
-    ctx.lineWidth = 1.5;
+    // Centre divider
+    ctx.strokeStyle = "#e2e8f0";
+    ctx.lineWidth = sc;
+    ctx.setLineDash([5 * sc, 4 * sc]);
     ctx.beginPath();
-    ctx.moveTo(60, y + 80);
-    ctx.lineTo(240, y + 80);
-    ctx.stroke();
-    ctx.fillStyle = "#1a202c";
-    ctx.font = "bold 16px 'Hind Siliguri', sans-serif";
-    ctx.fillText("রিয়াজ ইসলাম", 150, y + 100);
-    ctx.fillStyle = "#718096";
-    ctx.font = "13px 'Hind Siliguri', sans-serif";
-    ctx.fillText("অ্যাডমিন", 150, y + 118);
-
-    // Right signature — Sobhapati
-    ctx.fillStyle = "#4a5568";
-    ctx.font = "14px 'Hind Siliguri', sans-serif";
-    ctx.fillText("সভাপতির স্বাক্ষর", canvasWidth - 150, y + 28);
-    ctx.strokeStyle = "#2d3748";
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.moveTo(canvasWidth - 240, y + 80);
-    ctx.lineTo(canvasWidth - 60, y + 80);
-    ctx.stroke();
-    ctx.fillStyle = "#1a202c";
-    ctx.font = "bold 16px 'Hind Siliguri', sans-serif";
-    ctx.fillText("নাঈম মৃধা", canvasWidth - 150, y + 100);
-    ctx.fillStyle = "#718096";
-    ctx.font = "13px 'Hind Siliguri', sans-serif";
-    ctx.fillText("সভাপতি", canvasWidth - 150, y + 118);
-}
-
-function exportSingleReceipt(item) {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: [80, 140] });
-
-    const canvas = document.createElement("canvas");
-    canvas.width = 600;
-    canvas.height = 1050;
-    const ctx = canvas.getContext("2d");
-
-    // White background
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, 600, 1050);
-
-    // Top decorative bar
-    ctx.fillStyle = "#1a56db";
-    ctx.fillRect(0, 0, 600, 8);
-
-    // Header area
-    const headerGrad = ctx.createLinearGradient(0, 8, 0, 110);
-    headerGrad.addColorStop(0, "#1e3a8a");
-    headerGrad.addColorStop(1, "#1d4ed8");
-    ctx.fillStyle = headerGrad;
-    ctx.fillRect(0, 8, 600, 105);
-
-    // Logo circle
-    ctx.fillStyle = "rgba(255,255,255,0.15)";
-    ctx.beginPath();
-    ctx.arc(60, 58, 32, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 28px sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText("৳", 60, 68);
-
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 28px 'Hind Siliguri', sans-serif";
-    ctx.textAlign = "left";
-    ctx.fillText("টাকা ম্যানেজার", 110, 50);
-    ctx.font = "16px 'Hind Siliguri', sans-serif";
-    ctx.fillStyle = "rgba(255,255,255,0.8)";
-    ctx.fillText("পেমেন্ট রিসিট", 110, 75);
-
-    // Receipt number / date top right
-    ctx.textAlign = "right";
-    ctx.font = "13px 'Hind Siliguri', sans-serif";
-    ctx.fillStyle = "rgba(255,255,255,0.75)";
-    const nowStr = new Date().toLocaleDateString("bn-BD", { year: "numeric", month: "long", day: "numeric" });
-    ctx.fillText(nowStr, 575, 50);
-    ctx.fillText(`ID: ${item.id?.slice(-6).toUpperCase() || "------"}`, 575, 70);
-
-    // Status badge
-    const isIncome = item.type === "income";
-    const badgeColor = isIncome ? "#d1fae5" : "#fee2e2";
-    const badgeText = isIncome ? "✓  টাকা জমা" : "✗  টাকা খরচ";
-    const badgeFg = isIncome ? "#065f46" : "#991b1b";
-    ctx.fillStyle = badgeColor;
-    ctx.beginPath();
-    ctx.roundRect(200, 125, 200, 38, 19);
-    ctx.fill();
-    ctx.fillStyle = badgeFg;
-    ctx.font = "bold 17px 'Hind Siliguri', sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText(badgeText, 300, 149);
-
-    // Big amount
-    ctx.fillStyle = isIncome ? "#047857" : "#dc2626";
-    ctx.font = "bold 58px 'Hind Siliguri', sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText(`৳ ${Number(item.amount).toLocaleString("bn-BD")}`, 300, 240);
-
-    // Dashed divider
-    ctx.strokeStyle = "#cbd5e1";
-    ctx.lineWidth = 1.5;
-    ctx.setLineDash([8, 6]);
-    ctx.beginPath();
-    ctx.moveTo(30, 265);
-    ctx.lineTo(570, 265);
+    ctx.moveTo(canvasWidth / 2, y + 20 * sc);
+    ctx.lineTo(canvasWidth / 2, y + boxH - 20 * sc);
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // Scissor icon on divider
-    ctx.fillStyle = "#94a3b8";
-    ctx.font = "18px sans-serif";
-    ctx.textAlign = "left";
-    ctx.fillText("✂", 14, 270);
+    const lx = canvasWidth / 4;
+    const rx = (canvasWidth / 4) * 3;
 
-    // Info rows (no note)
+    // Labels
+    ctx.fillStyle = "#64748b";
+    ctx.font = `${18 * sc}px ${FONT}`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "alphabetic";
+    ctx.fillText("অ্যাডমিনের স্বাক্ষর", lx, y + 36 * sc);
+    ctx.fillText("সভাপতির স্বাক্ষর", rx, y + 36 * sc);
+
+    // Signature lines
+    ctx.strokeStyle = "#334155";
+    ctx.lineWidth = 2 * sc;
+    const lineW = 160 * sc;
+    ctx.beginPath(); ctx.moveTo(lx - lineW / 2, y + 110 * sc); ctx.lineTo(lx + lineW / 2, y + 110 * sc); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(rx - lineW / 2, y + 110 * sc); ctx.lineTo(rx + lineW / 2, y + 110 * sc); ctx.stroke();
+
+    // Names
+    ctx.fillStyle = "#1e293b";
+    ctx.font = `bold ${22 * sc}px ${FONT}`;
+    ctx.fillText("রিয়াজ ইসলাম", lx, y + 138 * sc);
+    ctx.fillText("নাঈম মৃধা", rx, y + 138 * sc);
+
+    // Roles
+    ctx.fillStyle = "#94a3b8";
+    ctx.font = `${17 * sc}px ${FONT}`;
+    ctx.fillText("অ্যাডমিন", lx, y + 160 * sc);
+    ctx.fillText("সভাপতি", rx, y + 160 * sc);
+}
+
+function exportSingleReceipt(item) {
+    // ===== HIGH-RES CANVAS (2x DPI for crisp PDF text) =====
+    const CW = 900;   // canvas width  (printed as 80mm → ~2.25× upscale)
+    const CH = 1400;  // canvas height (printed as 140mm)
+    const canvas = document.createElement("canvas");
+    canvas.width = CW;
+    canvas.height = CH;
+    const ctx = canvas.getContext("2d");
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+
+    const isIncome = item.type === "income";
+    const ACCENT = isIncome ? "#059669" : "#dc2626";
+    const ACCENT_BG = isIncome ? "#ecfdf5" : "#fff1f2";
+    const ACCENT_LT = isIncome ? "#d1fae5" : "#fee2e2";
+    const FONT = "'Hind Siliguri', 'Noto Sans Bengali', sans-serif";
+
+    // ── Background ──────────────────────────────────────────
+    ctx.fillStyle = "#f8fafc";
+    ctx.fillRect(0, 0, CW, CH);
+
+    // White card inset
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath();
+    ctx.roundRect(24, 24, CW - 48, CH - 48, 20);
+    ctx.fill();
+    ctx.strokeStyle = "#e2e8f0";
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // ── Top accent stripe ────────────────────────────────────
+    ctx.fillStyle = ACCENT;
+    ctx.beginPath();
+    ctx.roundRect(24, 24, CW - 48, 10, [20, 20, 0, 0]);
+    ctx.fill();
+
+    // ── Header gradient band ─────────────────────────────────
+    const hGrad = ctx.createLinearGradient(0, 34, 0, 175);
+    hGrad.addColorStop(0, "#1e3a8a");
+    hGrad.addColorStop(1, "#2563eb");
+    ctx.fillStyle = hGrad;
+    ctx.fillRect(24, 34, CW - 48, 142);
+
+    // Logo circle
+    ctx.fillStyle = "rgba(255,255,255,0.18)";
+    ctx.beginPath();
+    ctx.arc(100, 105, 44, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#ffffff";
+    ctx.font = `bold 40px sans-serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("৳", 100, 107);
+
+    // App title
+    ctx.textAlign = "left";
+    ctx.textBaseline = "alphabetic";
+    ctx.fillStyle = "#ffffff";
+    ctx.font = `bold 36px ${FONT}`;
+    ctx.fillText("টাকা ম্যানেজার", 164, 95);
+    ctx.font = `22px ${FONT}`;
+    ctx.fillStyle = "rgba(255,255,255,0.82)";
+    ctx.fillText("পেমেন্ট রিসিট", 166, 128);
+
+    // Date + ID (top-right of header)
+    ctx.textAlign = "right";
+    ctx.font = `18px ${FONT}`;
+    ctx.fillStyle = "rgba(255,255,255,0.80)";
+    const nowStr = new Date().toLocaleDateString("bn-BD", { year: "numeric", month: "long", day: "numeric" });
+    ctx.fillText(nowStr, CW - 48, 90);
+    ctx.font = `16px ${FONT}`;
+    ctx.fillStyle = "rgba(255,255,255,0.65)";
+    ctx.fillText(`ID: ${item.id?.slice(-6).toUpperCase() || "------"}`, CW - 48, 116);
+
+    // ── Status badge ─────────────────────────────────────────
+    const badgeText = isIncome ? "✓  টাকা জমা" : "✗  টাকা খরচ";
+    const badgeFg = isIncome ? "#065f46" : "#991b1b";
+    ctx.textAlign = "center";
+    ctx.fillStyle = ACCENT_LT;
+    ctx.beginPath();
+    ctx.roundRect(CW / 2 - 130, 196, 260, 50, 25);
+    ctx.fill();
+    ctx.fillStyle = badgeFg;
+    ctx.font = `bold 24px ${FONT}`;
+    ctx.fillText(badgeText, CW / 2, 228);
+
+    // ── Big amount ───────────────────────────────────────────
+    ctx.fillStyle = ACCENT;
+    ctx.font = `bold 88px ${FONT}`;
+    ctx.textAlign = "center";
+    ctx.fillText(`৳ ${Number(item.amount).toLocaleString("bn-BD")}`, CW / 2, 355);
+
+    // Subtle amount underline
+    ctx.strokeStyle = ACCENT_LT;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(CW / 2 - 160, 372); ctx.lineTo(CW / 2 + 160, 372);
+    ctx.stroke();
+
+    // ── Dashed tear divider ──────────────────────────────────
+    ctx.strokeStyle = "#cbd5e1";
+    ctx.lineWidth = 2;
+    ctx.setLineDash([12, 8]);
+    ctx.beginPath();
+    ctx.moveTo(50, 410); ctx.lineTo(CW - 50, 410);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = "#94a3b8";
+    ctx.font = "26px sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText("✂", 30, 418);
+
+    // ── Info cards ───────────────────────────────────────────
     const infoRows = [
         ["👤  নাম / বিবরণ", item.name || "—"],
         ["📅  তারিখ", fmtDate(item.date)],
@@ -1293,68 +1330,79 @@ function exportSingleReceipt(item) {
 
     ctx.textAlign = "left";
     infoRows.forEach((row, i) => {
-        const y = 295 + i * 75;
-        // card bg
-        const cardGrad = ctx.createLinearGradient(30, y - 5, 570, y + 55);
-        cardGrad.addColorStop(0, "#f8fafc");
-        cardGrad.addColorStop(1, "#f1f5f9");
-        ctx.fillStyle = cardGrad;
+        const cy = 440 + i * 108;
+        // card shadow simulation
+        ctx.fillStyle = "rgba(0,0,0,0.04)";
         ctx.beginPath();
-        ctx.roundRect(30, y - 5, 540, 60, 10);
+        ctx.roundRect(48, cy - 2, CW - 96, 88, 14);
+        ctx.fill();
+        // card bg
+        const cGrad = ctx.createLinearGradient(46, cy - 4, CW - 46, cy + 86);
+        cGrad.addColorStop(0, "#f8fafc");
+        cGrad.addColorStop(1, "#f1f5f9");
+        ctx.fillStyle = cGrad;
+        ctx.beginPath();
+        ctx.roundRect(46, cy - 4, CW - 92, 86, 14);
         ctx.fill();
         ctx.strokeStyle = "#e2e8f0";
-        ctx.lineWidth = 1;
+        ctx.lineWidth = 1.5;
         ctx.stroke();
         // left accent bar
-        ctx.fillStyle = isIncome ? "#10b981" : "#ef4444";
+        ctx.fillStyle = ACCENT;
         ctx.beginPath();
-        ctx.roundRect(30, y - 5, 5, 60, [3, 0, 0, 3]);
+        ctx.roundRect(46, cy - 4, 6, 86, [14, 0, 0, 14]);
         ctx.fill();
 
+        // Label
         ctx.fillStyle = "#64748b";
-        ctx.font = "14px 'Hind Siliguri', sans-serif";
-        ctx.fillText(row[0], 50, y + 16);
+        ctx.font = `18px ${FONT}`;
+        ctx.fillText(row[0], 70, cy + 24);
+        // Value
         ctx.fillStyle = "#0f172a";
-        ctx.font = "bold 20px 'Hind Siliguri', sans-serif";
-        ctx.fillText(row[1], 50, y + 42);
+        ctx.font = `bold 28px ${FONT}`;
+        ctx.fillText(row[1], 70, cy + 62);
     });
 
-    // Signatures
-    const sigY = 530;
-    drawSignatures(ctx, 600, sigY);
+    // ── Signatures ───────────────────────────────────────────
+    const sigY = 800;
+    drawSignatures(ctx, CW, sigY);
 
-    // Bottom footer
+    // ── Footer band ──────────────────────────────────────────
     ctx.fillStyle = "#1e3a8a";
-    ctx.fillRect(0, 690, 600, 50);
+    ctx.beginPath();
+    ctx.roundRect(24, CH - 112, CW - 48, 64, [0, 0, 20, 20]);
+    ctx.fill();
     ctx.fillStyle = "#ffffff";
-    ctx.font = "13px 'Hind Siliguri', sans-serif";
+    ctx.font = `bold 20px ${FONT}`;
     ctx.textAlign = "center";
-    ctx.fillText("টাকা ম্যানেজার — Money Management App", 300, 712);
+    ctx.fillText("টাকা ম্যানেজার — Money Management App", CW / 2, CH - 80);
     ctx.fillStyle = "rgba(255,255,255,0.65)";
-    ctx.font = "12px 'Hind Siliguri', sans-serif";
-    ctx.fillText(`মুদ্রণের সময়: ${new Date().toLocaleString("bn-BD")}`, 300, 730);
+    ctx.font = `16px ${FONT}`;
+    ctx.fillText(`মুদ্রণের সময়: ${new Date().toLocaleString("bn-BD")}`, CW / 2, CH - 56);
 
-    // Bottom blue bar
-    ctx.fillStyle = "#1a56db";
-    ctx.fillRect(0, 740, 600, 8);
+    // Bottom accent stripe
+    ctx.fillStyle = ACCENT;
+    ctx.beginPath();
+    ctx.roundRect(24, CH - 50, CW - 48, 10, [0, 0, 20, 20]);
+    ctx.fill();
 
-    const imgData = canvas.toDataURL("image/png");
-
+    // ── Export ───────────────────────────────────────────────
+    const imgData = canvas.toDataURL("image/png", 1.0);
     const safeName = item.name?.replace(/\s/g, "-") || "entry";
     const safeDate = item.date || "date";
 
     if (receiptFormat === "image") {
-        // Image হিসেবে ডাউনলোড (PNG)
         const link = document.createElement("a");
         link.download = `receipt-${safeName}-${safeDate}.png`;
         link.href = imgData;
         link.click();
         showMsg("🖼️ রিসিট Image ডাউনলোড হচ্ছে!", "info");
     } else {
-        // PDF হিসেবে ডাউনলোড (default)
-        doc.addImage(imgData, "PNG", 0, 0, 80, 140);
-        const filename = `receipt-${safeName}-${safeDate}.pdf`;
-        doc.save(filename);
+        // PDF — 80×140mm, high-res canvas embedded
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: [80, 140] });
+        doc.addImage(imgData, "PNG", 0, 0, 80, 140, undefined, "FAST");
+        doc.save(`receipt-${safeName}-${safeDate}.pdf`);
         showMsg("🧾 রিসিট PDF ডাউনলোড হচ্ছে!", "info");
     }
 }
@@ -1363,165 +1411,175 @@ function exportSingleReceipt(item) {
 function exportToPDFWithBangla(rows, title, type) {
     const { jsPDF } = window.jspdf;
 
-    // ── A4 portrait dimensions in px at 96dpi equivalent
-    // A4 = 210mm × 297mm. We use 794×1123 canvas (≈ 96dpi A4 portrait)
-    const CW = 794;   // canvas width  — matches A4 portrait width
-    const CH = 1123;  // canvas height — matches A4 portrait height (one page)
+    // ── 2× DPI: logical A4 at 96dpi scaled up 2× for crisp text
+    const SCALE = 2.5;            // resolution multiplier
+    const LW = 794;            // logical width  (A4 @ 96dpi)
+    const LH = 1123;           // logical height (A4 @ 96dpi)
+    const CW = LW * SCALE;    // canvas width  = 1985
+    const CH = LH * SCALE;    // canvas height = 2808
 
-    const MARGIN = 28;   // left/right margin
-    const TW = CW - MARGIN * 2;  // table usable width = 738
-    const ROW_H = 30;
-    const HDR_H = 118;  // header section height
-    const THDR_H = 32;   // table-header row height
+    // All measurements in LOGICAL pixels — multiply by SCALE when drawing
+    const MARGIN = 28;
+    const TW = LW - MARGIN * 2;   // 738
+    const ROW_H = 32;
+    const HDR_H = 120;
+    const THDR_H = 34;
 
     const isIncome = type === "income";
     const accentCol = isIncome ? "#059669" : "#dc2626";
     const accentDark = isIncome ? "#065f46" : "#991b1b";
     const accentLite = isIncome ? "#d1fae5" : "#fee2e2";
+    const FONT = "'Hind Siliguri', 'Noto Sans Bengali', sans-serif";
 
     const total = rows.reduce((s, r) => s + (r.amount || 0), 0);
     const dateStr = new Date().toLocaleDateString("bn-BD", { year: "numeric", month: "long", day: "numeric" });
 
-    // Column layout — widths must sum to TW (738)
-    // [নাম, টাকা, তারিখ, মাধ্যম, ধরন]
-    const COL_W = [220, 130, 120, 140, 128]; // sum = 738 ✓
+    const COL_W = [220, 130, 120, 140, 128];
     const COL_X = COL_W.reduce((acc, w, i) => {
         acc.push(i === 0 ? MARGIN : acc[i - 1] + COL_W[i - 1]);
         return acc;
     }, []);
     const HEADERS = ["নাম / বিবরণ", "টাকা", "তারিখ", "মাধ্যম", "ধরন"];
 
-    // ── How many rows fit per page after the first-page header
-    const firstPageBodyH = CH - HDR_H - THDR_H - 40 - 60; // 40=summary, 60=footer+sig
-    const otherPageBodyH = CH - THDR_H - 40 - 60;
+    const firstPageBodyH = LH - HDR_H - THDR_H - 40 - 60;
+    const otherPageBodyH = LH - THDR_H - 40 - 60;
     const rowsPerFirst = Math.max(1, Math.floor(firstPageBodyH / ROW_H));
     const rowsPerOther = Math.max(1, Math.floor(otherPageBodyH / ROW_H));
 
-    // Split rows into pages
     const pages = [];
     let remaining = [...rows];
     pages.push(remaining.splice(0, rowsPerFirst));
     while (remaining.length > 0) pages.push(remaining.splice(0, rowsPerOther));
 
     const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-    const pdfW = doc.internal.pageSize.getWidth();   // 210mm
-    const pdfH = doc.internal.pageSize.getHeight();  // 297mm
-    const scale = pdfW / CW; // mm per canvas-px
+    const pdfW = doc.internal.pageSize.getWidth();
+    const pdfH = doc.internal.pageSize.getHeight();
 
-    // ────────────────────────────────────────────────
+    // Helper: scale a logical px value to canvas px
+    const S = v => v * SCALE;
+
+    // Helper: font string at logical size → canvas size
+    const F = (size, weight = "") => `${weight ? weight + " " : ""}${S(size)}px ${FONT}`;
+
     function drawPageCanvas(pageRows, pageIdx, totalPages) {
         const canvas = document.createElement("canvas");
         canvas.width = CW;
         canvas.height = CH;
         const ctx = canvas.getContext("2d");
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = "high";
 
         // Background
         ctx.fillStyle = "#f8fafc";
         ctx.fillRect(0, 0, CW, CH);
 
-        let curY = 0;
+        let curY = 0;   // in LOGICAL px
 
-        // ── PAGE 1: draw big header
+        // ── First page: big header ──────────────────────────────
         if (pageIdx === 0) {
-            // gradient header band
-            const grad = ctx.createLinearGradient(0, 0, CW, HDR_H);
+            const grad = ctx.createLinearGradient(0, 0, S(LW), S(HDR_H));
             grad.addColorStop(0, accentDark);
             grad.addColorStop(1, accentCol);
             ctx.fillStyle = grad;
-            ctx.fillRect(0, 0, CW, HDR_H);
+            ctx.fillRect(0, 0, CW, S(HDR_H));
 
             // decorative circles
             ctx.fillStyle = "rgba(255,255,255,0.07)";
-            ctx.beginPath(); ctx.arc(60, 0, 80, 0, Math.PI * 2); ctx.fill();
-            ctx.beginPath(); ctx.arc(CW - 70, HDR_H, 100, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(S(60), 0, S(80), 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(S(LW - 70), S(HDR_H), S(100), 0, Math.PI * 2); ctx.fill();
 
             // logo circle
             ctx.fillStyle = "rgba(255,255,255,0.18)";
-            ctx.beginPath(); ctx.arc(60, 60, 34, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(S(62), S(62), S(36), 0, Math.PI * 2); ctx.fill();
             ctx.fillStyle = "#fff";
-            ctx.font = "bold 30px sans-serif";
+            ctx.font = F(32, "bold");
             ctx.textAlign = "center";
-            ctx.fillText("৳", 60, 72);
+            ctx.textBaseline = "middle";
+            ctx.fillText("৳", S(62), S(64));
 
-            // app name + report title
+            // app name + title
             ctx.textAlign = "left";
+            ctx.textBaseline = "alphabetic";
             ctx.fillStyle = "#fff";
-            ctx.font = "bold 28px 'Hind Siliguri',sans-serif";
-            ctx.fillText("টাকা ম্যানেজার", 110, 48);
-            ctx.font = "17px 'Hind Siliguri',sans-serif";
+            ctx.font = F(26, "bold");
+            ctx.fillText("টাকা ম্যানেজার", S(112), S(52));
+            ctx.font = F(16);
             ctx.fillStyle = "rgba(255,255,255,0.85)";
-            ctx.fillText(title, 112, 74);
+            ctx.fillText(title, S(114), S(78));
 
-            // right-side stats
+            // right stats
             ctx.textAlign = "right";
             ctx.fillStyle = "rgba(255,255,255,0.75)";
-            ctx.font = "13px 'Hind Siliguri',sans-serif";
-            ctx.fillText(`তারিখ: ${dateStr}`, CW - MARGIN, 38);
+            ctx.font = F(13);
+            ctx.fillText(`তারিখ: ${dateStr}`, S(LW - MARGIN), S(40));
             ctx.fillStyle = "#fff";
-            ctx.font = "bold 14px 'Hind Siliguri',sans-serif";
-            ctx.fillText(`মোট এন্ট্রি: ${rows.length} টি`, CW - MARGIN, 62);
-            ctx.font = "bold 20px 'Hind Siliguri',sans-serif";
+            ctx.font = F(14, "bold");
+            ctx.fillText(`মোট এন্ট্রি: ${rows.length} টি`, S(LW - MARGIN), S(66));
+            ctx.font = F(20, "bold");
             ctx.fillStyle = accentLite;
-            ctx.fillText(`মোট: ৳${total.toLocaleString("bn-BD")}`, CW - MARGIN, 94);
+            ctx.fillText(`মোট: ৳${total.toLocaleString("bn-BD")}`, S(LW - MARGIN), S(96));
 
-            // top accent bar
-            ctx.fillStyle = "rgba(255,255,255,0.25)";
-            ctx.fillRect(0, 0, CW, 6);
+            // top shimmer
+            ctx.fillStyle = "rgba(255,255,255,0.22)";
+            ctx.fillRect(0, 0, CW, S(6));
 
             curY = HDR_H;
         } else {
-            // continuation pages — small header bar
+            // continuation mini-header
             ctx.fillStyle = accentDark;
-            ctx.fillRect(0, 0, CW, 40);
+            ctx.fillRect(0, 0, CW, S(42));
             ctx.fillStyle = "#fff";
-            ctx.font = "bold 16px 'Hind Siliguri',sans-serif";
+            ctx.font = F(15, "bold");
             ctx.textAlign = "left";
-            ctx.fillText(`টাকা ম্যানেজার — ${title}`, MARGIN, 26);
+            ctx.textBaseline = "alphabetic";
+            ctx.fillText(`টাকা ম্যানেজার — ${title}`, S(MARGIN), S(27));
             ctx.textAlign = "right";
-            ctx.font = "13px 'Hind Siliguri',sans-serif";
+            ctx.font = F(13);
             ctx.fillStyle = "rgba(255,255,255,0.7)";
-            ctx.fillText(`পৃষ্ঠা ${pageIdx + 1} / ${totalPages}`, CW - MARGIN, 26);
-            curY = 40;
+            ctx.fillText(`পৃষ্ঠা ${pageIdx + 1} / ${totalPages}`, S(LW - MARGIN), S(27));
+            curY = 42;
         }
 
-        // ── Table header
+        // ── Table header row ─────────────────────────────────────
         ctx.fillStyle = "#1e293b";
-        ctx.fillRect(0, curY, CW, THDR_H);
+        ctx.fillRect(0, S(curY), CW, S(THDR_H));
         ctx.fillStyle = "#f1f5f9";
-        ctx.font = "bold 13px 'Hind Siliguri',sans-serif";
+        ctx.font = F(13, "bold");
         ctx.textAlign = "left";
+        ctx.textBaseline = "alphabetic";
         HEADERS.forEach((h, i) => {
-            ctx.fillText(h, COL_X[i] + 8, curY + 21);
+            ctx.fillText(h, S(COL_X[i] + 8), S(curY + 23));
         });
-        // header col separators
         ctx.strokeStyle = "rgba(255,255,255,0.15)";
-        ctx.lineWidth = 1;
+        ctx.lineWidth = S(1);
         COL_X.slice(1).forEach(x => {
-            ctx.beginPath(); ctx.moveTo(x, curY + 2); ctx.lineTo(x, curY + THDR_H - 2); ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(S(x), S(curY + 3));
+            ctx.lineTo(S(x), S(curY + THDR_H - 3));
+            ctx.stroke();
         });
         curY += THDR_H;
 
-        // ── Data rows
+        // ── Data rows ────────────────────────────────────────────
         pageRows.forEach((d, idx) => {
             const rowY = curY + idx * ROW_H;
             const rowIsInc = d.type === "income";
 
-            // alternating bg
             ctx.fillStyle = idx % 2 === 0 ? "#ffffff" : "#f1f5f9";
-            ctx.fillRect(0, rowY, CW, ROW_H);
+            ctx.fillRect(0, S(rowY), CW, S(ROW_H));
 
-            // left accent stripe
+            // accent stripe
             ctx.fillStyle = rowIsInc ? "#10b98133" : "#ef444433";
-            ctx.fillRect(0, rowY, 5, ROW_H);
+            ctx.fillRect(0, S(rowY), S(5), S(ROW_H));
 
-            // bottom grid line
+            // grid line
             ctx.strokeStyle = "#e2e8f0";
-            ctx.lineWidth = 0.5;
-            ctx.beginPath(); ctx.moveTo(0, rowY + ROW_H); ctx.lineTo(CW, rowY + ROW_H); ctx.stroke();
+            ctx.lineWidth = S(0.5);
+            ctx.beginPath(); ctx.moveTo(0, S(rowY + ROW_H)); ctx.lineTo(CW, S(rowY + ROW_H)); ctx.stroke();
 
             // col separators
             COL_X.slice(1).forEach(x => {
-                ctx.beginPath(); ctx.moveTo(x, rowY); ctx.lineTo(x, rowY + ROW_H); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(S(x), S(rowY)); ctx.lineTo(S(x), S(rowY + ROW_H)); ctx.stroke();
             });
 
             const amtColor = rowIsInc ? "#059669" : "#dc2626";
@@ -1534,58 +1592,55 @@ function exportToPDFWithBangla(rows, title, type) {
             ];
             cells.forEach((cell, i) => {
                 ctx.fillStyle = cell.color;
-                ctx.font = (cell.bold ? "bold " : "") + "13px 'Hind Siliguri',sans-serif";
+                ctx.font = F(13, cell.bold ? "bold" : "");
                 ctx.textAlign = "left";
-                ctx.fillText(cell.text, COL_X[i] + 8, rowY + 20);
+                ctx.textBaseline = "alphabetic";
+                ctx.fillText(cell.text, S(COL_X[i] + 8), S(rowY + 22));
             });
         });
 
         curY += pageRows.length * ROW_H;
 
-        // ── Summary bar (last page only)
+        // ── Summary + signatures (last page only) ────────────────
         const isLastPage = pageIdx === totalPages - 1;
         if (isLastPage) {
             ctx.fillStyle = "#1e293b";
-            ctx.fillRect(0, curY, CW, 36);
+            ctx.fillRect(0, S(curY), CW, S(38));
             ctx.textAlign = "left";
             ctx.fillStyle = "#94a3b8";
-            ctx.font = "bold 13px 'Hind Siliguri',sans-serif";
-            ctx.fillText(`মোট ${rows.length} টি লেনদেন`, MARGIN + 4, curY + 23);
+            ctx.font = F(13, "bold");
+            ctx.fillText(`মোট ${rows.length} টি লেনদেন`, S(MARGIN + 4), S(curY + 25));
             ctx.textAlign = "right";
             ctx.fillStyle = accentLite;
-            ctx.font = "bold 15px 'Hind Siliguri',sans-serif";
-            ctx.fillText(`সর্বমোট: ৳${total.toLocaleString("bn-BD")}`, CW - MARGIN, curY + 23);
-            curY += 36;
+            ctx.font = F(16, "bold");
+            ctx.fillText(`সর্বমোট: ৳${total.toLocaleString("bn-BD")}`, S(LW - MARGIN), S(curY + 25));
+            curY += 38;
 
-            // ── Signatures
-            drawSignatures(ctx, CW, curY + 16);
+            drawSignatures(ctx, LW * SCALE, S(curY + 16));
             curY += 170;
         }
 
-        // ── Footer bar — always at bottom of page
-        const footY = CH - 50;
+        // ── Footer ───────────────────────────────────────────────
+        const footY = LH - 50;
         ctx.fillStyle = accentDark;
-        ctx.fillRect(0, footY, CW, 43);
+        ctx.fillRect(0, S(footY), CW, S(43));
         ctx.fillStyle = "#fff";
         ctx.textAlign = "center";
-        ctx.font = "13px 'Hind Siliguri',sans-serif";
-        ctx.fillText("টাকা ম্যানেজার — Money Management App", CW / 2, footY + 17);
+        ctx.font = F(13, "bold");
+        ctx.fillText("টাকা ম্যানেজার — Money Management App", S(LW / 2), S(footY + 18));
         ctx.fillStyle = "rgba(255,255,255,0.6)";
-        ctx.font = "11px 'Hind Siliguri',sans-serif";
-        ctx.fillText(`মুদ্রণের সময়: ${new Date().toLocaleString("bn-BD")}  |  পৃষ্ঠা ${pageIdx + 1} / ${totalPages}`, CW / 2, footY + 33);
-        // accent bottom stripe
+        ctx.font = F(11);
+        ctx.fillText(`মুদ্রণের সময়: ${new Date().toLocaleString("bn-BD")}  |  পৃষ্ঠা ${pageIdx + 1} / ${totalPages}`, S(LW / 2), S(footY + 34));
         ctx.fillStyle = accentCol;
-        ctx.fillRect(0, CH - 7, CW, 7);
+        ctx.fillRect(0, S(LH - 7), CW, S(7));
 
         return canvas;
     }
-    // ────────────────────────────────────────────────
 
     pages.forEach((pageRows, pageIdx) => {
         if (pageIdx > 0) doc.addPage();
         const canvas = drawPageCanvas(pageRows, pageIdx, pages.length);
-        // Each canvas is exactly CW×CH → maps to full A4 page
-        doc.addImage(canvas.toDataURL("image/png"), "PNG", 0, 0, pdfW, pdfH);
+        doc.addImage(canvas.toDataURL("image/png", 1.0), "PNG", 0, 0, pdfW, pdfH, undefined, "FAST");
     });
 
     const filename = `${isIncome ? "joma" : "khoroch"}-talika-${new Date().toLocaleDateString("en")}.pdf`;
@@ -1593,7 +1648,6 @@ function exportToPDFWithBangla(rows, title, type) {
     addLog("🖨️", `${title} PDF ডাউনলোড করা হয়েছে।`);
     showMsg("📄 PDF ডাউনলোড হচ্ছে!", "info");
 }
-
 // ===== PDF BUTTONS =====
 document.getElementById("pdfIncomeBtn").onclick = () => {
     const income = getFilteredData().filter(d => d.type === "income");
