@@ -94,7 +94,7 @@ function renderLog() {
 // ===== AUTO LOGOUT TIMER =====
 let autoLogoutTimer = null;
 let countdownInterval = null;
-const AUTO_LOGOUT_MINUTES = 10; // ১০ মিনিট (৫ বা ১০ যেকোনো সেট করুন)
+const AUTO_LOGOUT_MINUTES = 15; // ১০ মিনিট (৫ বা ১০ যেকোনো সেট করুন)
 
 function clearAutoLogout() {
     if (autoLogoutTimer) { clearTimeout(autoLogoutTimer); autoLogoutTimer = null; }
