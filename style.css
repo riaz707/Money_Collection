@@ -1101,11 +1101,17 @@ tbody tr:hover td { background: #ebf4ff !important; }
     .ml-mobile-status-row {
         display: flex !important;
         align-items: center;
-        gap: 8px;
+        gap: 6px;
         padding: 8px 14px 10px !important;
         flex-wrap: wrap;
         box-sizing: border-box;
         width: 100%;
+    }
+    .ml-mobile-status-row .wa-mini-btn,
+    .ml-mobile-status-row .msgr-mini-btn {
+        font-size: 11px !important;
+        padding: 4px 8px !important;
+        flex-shrink: 0;
     }
 
     /* serial order btns mobile (inside name row) */
@@ -1442,12 +1448,36 @@ tbody tr:hover td { background: #ebf4ff !important; }
 .ml-serial, .ml-status, .ml-actions { display: flex; align-items: center; gap: 6px; }
 
 .wa-mini-btn {
-    font-size: 16px;
+    font-size: 12px;
+    font-weight: 600;
     text-decoration: none;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
+    gap: 3px;
+    padding: 4px 9px;
+    border-radius: 20px;
+    background: #dcfce7;
+    color: #15803d;
+    transition: opacity 0.15s;
 }
+.wa-mini-btn:hover { opacity: 0.8; }
+
+.msgr-mini-btn {
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 4px 9px;
+    border-radius: 20px;
+    background: #e0e7ff;
+    color: #4338ca;
+    transition: opacity 0.15s;
+}
+.msgr-mini-btn:hover { opacity: 0.8; }
 
 .action-btn-edit, .action-btn-del {
     background: none;
@@ -1638,4 +1668,37 @@ tbody tr:hover td { background: #ebf4ff !important; }
 [data-theme="dark"] .order-disabled {
     color: #4a5568;
     border-color: #2d3748;
+}
+
+/* ===== MEMBER TABLE RESPONSIVE (নতুন grid-based) ===== */
+.ml-table-wrap {
+    width: 100%;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1.5px solid var(--border);
+}
+
+.ml-row-item:nth-child(even) { background: var(--bg3); }
+.ml-row-item:hover { background: var(--card-hover, #f0f4ff); }
+
+/* Mobile: member table card layout */
+@media (max-width: 700px) {
+    .ml-table-wrap {
+        border: none;
+        background: transparent;
+        overflow: visible;
+    }
+
+    /* JS দিয়ে তৈরি grid row গুলো mobile এ flex card হবে */
+    .ml-row-item {
+        display: flex !important;
+        flex-direction: column !important;
+        padding: 12px 14px !important;
+        border-radius: 10px !important;
+        border: 1.5px solid var(--border) !important;
+        margin-bottom: 8px !important;
+        background: var(--card-bg) !important;
+        gap: 8px !important;
+    }
+    .ml-row-item > div { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 }

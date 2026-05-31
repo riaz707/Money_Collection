@@ -101,12 +101,16 @@ function clearAutoLogout() {
     if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
     const badge = document.getElementById("autoLogoutBadge");
     if (badge) badge.remove();
+    sessionStorage.removeItem("adminLoginTime");
 }
 
 function startAutoLogout() {
     clearAutoLogout();
+    // sessionStorage এ login সময় save করুন (refresh-safe)
+    sessionStorage.setItem("adminLoginTime", Date.now().toString());
     const totalSec = AUTO_LOGOUT_MINUTES * 60;
-    let remaining = totalSec;
+    const elapsed = 0;
+    let remaining = totalSec - elapsed;
 
     // Countdown badge তৈরি করো
     let badge = document.getElementById("autoLogoutBadge");
@@ -147,12 +151,37 @@ function startAutoLogout() {
         addLog("⏱️", `অ্যাডমিন ${AUTO_LOGOUT_MINUTES} মিনিট পর অটো লগআউট হয়েছেন।`);
         showMsg("⏱️ নিষ্ক্রিয়তার কারণে অটো লগআউট হয়েছে!", "error");
         signOut(auth).then(() => location.reload());
-    }, totalSec * 1000);
+    }, remaining * 1000);
 }
 
 onAuthStateChanged(auth, (user) => {
     isAdmin = !!user;
-    if (!isAdmin) clearAutoLogout();
+    if (!isAdmin) {
+        clearAutoLogout();
+        sessionStorage.removeItem("adminLoginTime");
+    } else {
+        // Refresh হলে sessionStorage থেকে বাকি সময় হিসাব করুন
+        const loginTime = sessionStorage.getItem("adminLoginTime");
+        if (loginTime) {
+            const elapsed = Math.floor((Date.now() - parseInt(loginTime)) / 1000);
+            const totalSec = AUTO_LOGOUT_MINUTES * 60;
+            const remaining = totalSec - elapsed;
+            if (remaining <= 0) {
+                // সময় শেষ — লগআউট
+                clearAutoLogout();
+                addLog("⏱️", `অ্যাডমিন ${AUTO_LOGOUT_MINUTES} মিনিট পর অটো লগআউট হয়েছেন।`);
+                showMsg("⏱️ নিষ্ক্রিয়তার কারণে অটো লগআউট হয়েছে!", "error");
+                signOut(auth).then(() => location.reload());
+                return;
+            } else {
+                // বাকি সময় দিয়ে টাইমার চালু করুন
+                startAutoLogoutWithRemaining(remaining);
+            }
+        } else {
+            // Fresh login — নতুন টাইমার
+            startAutoLogout();
+        }
+    }
 
     document.getElementById("adminBtn").style.display = isAdmin ? "none" : "block";
     document.getElementById("logoutBtn").style.display = isAdmin ? "block" : "none";
@@ -169,6 +198,51 @@ onAuthStateChanged(auth, (user) => {
     render(globalData);
 });
 
+// Refresh-safe auto logout — বাকি সময় নিয়ে শুরু করুন
+function startAutoLogoutWithRemaining(remaining) {
+    if (autoLogoutTimer) clearTimeout(autoLogoutTimer);
+    if (countdownInterval) clearInterval(countdownInterval);
+
+    let badge = document.getElementById("autoLogoutBadge");
+    if (!badge) {
+        badge = document.createElement("div");
+        badge.id = "autoLogoutBadge";
+        badge.style.cssText = `
+            position:fixed; bottom:20px; right:20px; z-index:9999;
+            background:#1a202c; color:#fff; border-radius:12px;
+            padding:8px 14px; font-size:13px; font-family:var(--font);
+            box-shadow:0 4px 16px rgba(0,0,0,0.3);
+            border:1.5px solid #e53e3e44;
+            display:flex; align-items:center; gap:8px;
+            transition: border-color 0.3s;
+            cursor:default; user-select:none;
+        `;
+        document.body.appendChild(badge);
+    }
+
+    function updateBadge() {
+        const m = Math.floor(remaining / 60);
+        const s = String(remaining % 60).padStart(2, "0");
+        const isWarning = remaining <= 60;
+        badge.style.borderColor = isWarning ? "#e53e3ecc" : "#e53e3e44";
+        badge.innerHTML = `<span style="font-size:15px;">${isWarning ? "⚠️" : "⏱️"}</span>
+            <span>অটো লগআউট: <strong style="color:${isWarning ? "#fc8181" : "#a3f7bf"};">${m}:${s}</strong></span>`;
+    }
+    updateBadge();
+    countdownInterval = setInterval(() => {
+        remaining--;
+        updateBadge();
+        if (remaining <= 0) clearInterval(countdownInterval);
+    }, 1000);
+
+    autoLogoutTimer = setTimeout(() => {
+        clearAutoLogout();
+        addLog("⏱️", `অ্যাডমিন ${AUTO_LOGOUT_MINUTES} মিনিট পর অটো লগআউট হয়েছেন।`);
+        showMsg("⏱️ নিষ্ক্রিয়তার কারণে অটো লগআউট হয়েছে!", "error");
+        signOut(auth).then(() => location.reload());
+    }, remaining * 1000);
+}
+
 document.getElementById("loginBtn").onclick = async () => {
     const email = document.getElementById("adminEmail").value;
     const pass = document.getElementById("adminPass").value;
@@ -178,6 +252,9 @@ document.getElementById("loginBtn").onclick = async () => {
         showMsg("✅ লগইন সফল!", "success");
         document.getElementById("loginModal").style.display = "none";
         addLog("🔐", "Admin লগইন করেছেন।");
+        sessionStorage.setItem("adminLoginTime", Date.now().toString());
+        // startAutoLogout onAuthStateChanged থেকেই call হবে না কারণ loginTime ইতিমধ্যে set
+        // তাই explicitly call করুন
         startAutoLogout();
     } catch {
         showMsg("❌ ভুল ইমেল বা পাসওয়ার্ড!", "error");
@@ -212,7 +289,54 @@ onSnapshot(collection(db, "members"), snap => {
         if (oa !== ob) return oa - ob;
         return (a.name || "").localeCompare(b.name || "", "bn");
     });
+    updateMemberDatalist();
     renderMembers();
+});
+
+// ===== SETTINGS SYNC (phoneVisible) =====
+// Firestore থেকে real-time settings load — admin যা set করবে view mode-এও দেখাবে
+onSnapshot(doc(db, "settings", "appConfig"), (snap) => {
+    if (snap.exists()) {
+        const data = snap.data();
+        if (typeof data.phoneVisible === "boolean" && data.phoneVisible !== phoneVisible) {
+            phoneVisible = data.phoneVisible;
+            renderMembers();
+        }
+    }
+});
+
+// datalist আপডেট করো সদস্য নাম দিয়ে
+function updateMemberDatalist() {
+    const dl = document.getElementById("memberSuggestions");
+    if (!dl) return;
+    dl.innerHTML = membersData.map(m => `<option value="${m.name}">`).join("");
+}
+
+// নাম input এ member select হলে WA/Messenger quick links দেখাও
+document.getElementById("name")?.addEventListener("input", function () {
+    const val = this.value.trim();
+    const member = membersData.find(m => m.name.toLowerCase() === val.toLowerCase());
+    let infoEl = document.getElementById("nameQuickLinks");
+    if (!infoEl) {
+        infoEl = document.createElement("div");
+        infoEl.id = "nameQuickLinks";
+        infoEl.style.cssText = "margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;";
+        this.parentElement.appendChild(infoEl);
+    }
+    if (member && (member.phone || member.messenger)) {
+        const phone = member.phone || "";
+        const messenger = member.messenger || "";
+        const previewMsg = encodeURIComponent(`আপনার পেমেন্ট এন্ট্রি করা হয়েছে।\nধন্যবাদ!`);
+        const waLink = phone ? `https://wa.me/88${phone}?text=${previewMsg}` : "";
+        const msgrLink = messenger ? `https://m.me/${messenger}?text=${previewMsg}` : (phone ? `https://m.me/88${phone}?text=${previewMsg}` : "");
+        infoEl.innerHTML = `
+            <span style="font-size:12px;color:var(--text-secondary);">📋 সদস্য পাওয়া গেছে:</span>
+            ${phone ? `<span style="font-size:12px;color:var(--text-secondary);">📞 ${phone}</span>` : ""}
+            ${waLink ? `<a href="${waLink}" target="_blank" class="wa-mini-btn" style="font-size:12px;">💬 WhatsApp</a>` : ""}
+            ${msgrLink ? `<a href="${msgrLink}" target="_blank" class="msgr-mini-btn" style="font-size:12px;">📨 Messenger</a>` : ""}`;
+    } else {
+        infoEl.innerHTML = "";
+    }
 });
 
 onSnapshot(collection(db, "budgets"), snap => {
@@ -458,6 +582,9 @@ async function fixAllMemberOrders() {
 }
 
 
+// ===== PHONE VISIBILITY STATE =====
+let phoneVisible = false; // Admin toggle করে দেখাবে/লুকাবে
+
 function renderMembers() {
     const el = document.getElementById("membersList");
     if (!el) return;
@@ -467,25 +594,38 @@ function renderMembers() {
     }
     const filterMonth = document.getElementById("memberMonthFilter")?.value || "";
 
-    // Admin রিসেট বাটন
+    // Admin control bar
     let resetBtn = "";
     if (isAdmin) {
-        resetBtn = `<div style="text-align:right;margin-bottom:8px;">
-            <button id="fixOrderBtn" style="background:#e53e3e;color:#fff;border:none;padding:6px 16px;border-radius:8px;cursor:pointer;font-size:13px;font-family:var(--font);font-weight:600;">🔄 সিরিয়াল রিসেট</button>
+        resetBtn = `<div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-bottom:10px;">
+            <button id="togglePhoneBtn" style="background:${phoneVisible ? '#3182ce' : '#718096'};color:#fff;border:none;padding:6px 16px;border-radius:8px;cursor:pointer;font-size:13px;font-family:var(--font);font-weight:600;">${phoneVisible ? '🙈 নম্বর লুকান' : '👁️ নম্বর দেখান'}</button>
+            <button id="fixOrderBtn" style="background:#38a169;color:#fff;border:none;padding:6px 16px;border-radius:8px;cursor:pointer;font-size:13px;font-family:var(--font);font-weight:600;">✅ SAVE</button>
         </div>`;
     }
 
-    // Header row
-    let html = resetBtn + `<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;"><div class="member-list-table">
-        <div class="member-list-header ${isAdmin ? 'has-actions' : ''}">
-            <div class="ml-serial">#</div>
-            <div class="ml-name">নাম</div>
-            <div class="ml-phone">ফোন</div>
-            <div class="ml-paid">পরিশোধ</div>
-            <div class="ml-due">লক্ষ্য</div>
-            <div class="ml-status">অবস্থা</div>
-            ${isAdmin ? `<div class="ml-actions">কার্যক্রম</div>` : ""}
-        </div>`;
+    // phone column দেখাবে কিনা — শুধু admin এবং phoneVisible=true হলে
+    const showPhoneCol = phoneVisible;
+
+    const isMobile = window.innerWidth <= 700;
+
+    // Grid columns — phone column conditionally include
+    const gridCols = showPhoneCol
+        ? (isAdmin ? "44px 1fr 140px 100px 90px 1fr 80px" : "44px 1fr 140px 100px 90px 1fr")
+        : (isAdmin ? "44px 1fr 100px 90px 1fr 80px" : "44px 1fr 100px 90px 1fr");
+
+    const headerStyle = `display:grid;grid-template-columns:${gridCols};background:#1e293b;color:#f1f5f9;font-size:12px;font-weight:700;padding:10px 10px;gap:8px;align-items:center;border-radius:10px 10px 0 0;`;
+    const rowStyle = `display:grid;grid-template-columns:${gridCols};padding:10px 10px;gap:8px;align-items:center;border-bottom:1px solid var(--border);font-size:13px;transition:background 0.15s;`;
+
+    let html = resetBtn + `<div class="ml-table-wrap">
+        ${!isMobile ? `<div style="${headerStyle}">
+            <div>#</div>
+            <div>নাম</div>
+            ${showPhoneCol ? `<div>ফোন</div>` : ""}
+            <div>পরিশোধ</div>
+            <div>লক্ষ্য</div>
+            <div>অবস্থা</div>
+            ${isAdmin ? `<div>কার্যক্রম</div>` : ""}
+        </div>` : ""}`;
 
     membersData.forEach((m, idx) => {
         const payments = globalData.filter(d => d.type === "income" && d.name === m.name);
@@ -496,10 +636,17 @@ function renderMembers() {
         const due = m.due || 0;
         const isPaid = due > 0 ? paid >= due : paid > 0;
         const phone = m.phone || "";
-        const reminderMsg = encodeURIComponent(`আসসালামুয়ালাইকুম ${m.name} ,\nআপনার ${filterMonth || "এই মাসের"} পেমেন্ট বাকি আছে।\nঅনুগ্রহ করে ৳${due.toLocaleString()} পাঠিয়ে দিন।\nধন্যবাদ।`);
-        const waLink = phone ? `https://wa.me/88${phone}?text=${reminderMsg}` : "#";
+        const messenger = m.messenger || "";
 
-        // Admin ক্রম কন্ট্রোল বাটন — desktop header serial cell-এ দেখাবে
+        // const reminderMsg = encodeURIComponent(`আসসালামুয়ালাইকুম ${m.name} ,\nআপনার ${filterMonth || "এই মাসের"} পেমেন্ট বাকি আছে।\nঅনুগ্রহ করে ৳${due.toLocaleString()} পাঠিয়ে দিন।\nধন্যবাদ।`);
+
+        const reminderMsg = encodeURIComponent(`আসসালামুয়ালাইকুম ${m.name},\nআপনার ${filterMonth || "এই মাসের"} মাসের পেমেন্ট বাকি আছে।\nঅনুগ্রহ করে টাকা পাঠিয়ে দিন।\nধন্যবাদ।`);
+        const paidMsg = encodeURIComponent(`আসসালামুয়ালাইকুম ${m.name},\nআপনার ${filterMonth || "এই মাসের"}  মাসের ৳${paid.toLocaleString()} পেমেন্ট পাওয়া গেছে। ধন্যবাদ! 🎉`);
+        const waLink = phone ? `https://wa.me/88${phone}?text=${reminderMsg}` : "#";
+        const waPaidLink = phone ? `https://wa.me/88${phone}?text=${paidMsg}` : "#";
+        const msgrLink = messenger ? `https://m.me/${messenger}?text=${reminderMsg}` : (phone ? `https://m.me/88${phone}?text=${reminderMsg}` : "#");
+        const msgrPaidLink = messenger ? `https://m.me/${messenger}?text=${paidMsg}` : (phone ? `https://m.me/88${phone}?text=${paidMsg}` : "#");
+
         const upBtn = idx > 0
             ? `<button class="order-btn order-up" data-idx="${idx}" title="উপরে নিন">▲</button>`
             : `<button class="order-btn order-disabled" disabled>▲</button>`;
@@ -507,64 +654,81 @@ function renderMembers() {
             ? `<button class="order-btn order-down" data-idx="${idx}" title="নিচে নিন">▼</button>`
             : `<button class="order-btn order-disabled" disabled>▼</button>`;
 
-        html += `<div class="member-list-row ${isAdmin ? 'has-actions' : ''} ${isPaid ? 'row-paid' : 'row-unpaid'}">
-            <!-- desktop: serial -->
-            <div class="ml-serial ml-desktop-only">
-                <span class="serial-badge">${idx + 1}</span>
-                ${isAdmin ? `<div class="serial-order-btns">${upBtn}${downBtn}</div>` : ""}
-            </div>
-            <!-- name row: সব সময় দেখাবে, mobile-এ serial+▲▼ এখানে একই লাইনে -->
-            <div class="ml-name">
-                <span class="serial-badge ml-mobile-only" style="flex-shrink:0;">${idx + 1}</span>
-                <span class="ml-name-text">${m.name}</span>
-                ${isAdmin ? `<div class="serial-order-btns ml-mobile-only" style="margin-left:auto;flex-direction:row;">
-                    <button class="order-btn${idx === 0 ? ' order-disabled' : ' order-up'}" data-idx="${idx}" ${idx === 0 ? 'disabled' : ''} title="উপরে নিন">▲</button>
-                    <button class="order-btn${idx === membersData.length - 1 ? ' order-disabled' : ' order-down'}" data-idx="${idx}" ${idx === membersData.length - 1 ? 'disabled' : ''} title="নিচে নিন">▼</button>
-                </div>` : ""}
-            </div>
-            <!-- desktop: phone -->
-            <div class="ml-phone ml-desktop-only">
-                ${phone ? `<a href="tel:${phone}" style="color:inherit;text-decoration:none;">📞 ${phone}</a>` : '<span style="color:var(--text-secondary)">—</span>'}
-            </div>
-            <!-- desktop: paid -->
-            <div class="ml-paid ml-desktop-only"><strong style="color:#38a169;">৳${paid.toLocaleString("bn-BD")}</strong></div>
-            <!-- desktop: due -->
-            <div class="ml-due ml-desktop-only">${due > 0 ? `৳${due.toLocaleString("bn-BD")}` : '—'}</div>
-            <!-- desktop: status -->
-            <div class="ml-status ml-desktop-only">
-                <span class="member-status ${isPaid ? 'status-paid' : 'status-unpaid'}">${isPaid ? "✅ পরিশোধ" : "⏳ বাকি"}</span>
-                ${!isPaid && phone ? `<a href="${waLink}" target="_blank" class="wa-mini-btn" title="WhatsApp রিমাইন্ডার">💬</a>` : ""}
-            </div>
-            <!-- desktop: actions -->
-            ${isAdmin ? `<div class="ml-actions ml-desktop-only">
-                <button class="edit-member-btn action-btn-edit" data-id="${m.id}" data-name="${m.name}" data-due="${due}" data-phone="${phone}" title="এডিট">✏️</button>
-                <button class="del-member-btn action-btn-del" data-id="${m.id}" title="মুছুন">🗑️</button>
-            </div>` : ""}
+        const rowBg = isPaid ? "border-left:4px solid #38a169;" : "border-left:4px solid #e53e3e;";
+        const rowEven = idx % 2 === 1 ? "background:var(--bg3);" : "";
 
-            <!-- mobile: পরিশোধ + ফোন (লক্ষ্য নেই) -->
-            <div class="ml-info-row ml-mobile-only">
-                <div class="ml-info-item">
-                    <span class="ml-info-label">পরিশোধ</span>
-                    <span class="ml-info-value" style="color:#38a169;">৳${paid.toLocaleString("bn-BD")}</span>
-                </div>
-                ${phone ? `<div class="ml-info-item">
-                    <span class="ml-info-label">ফোন</span>
-                    <span class="ml-info-value" style="font-size:13px;"><a href="tel:${phone}" style="color:inherit;text-decoration:none;">📞 ${phone}</a></span>
-                </div>` : ""}
-            </div>
-            <!-- mobile: status + actions row -->
-            <div class="ml-mobile-status-row ml-mobile-only">
+        // Status + reminder buttons
+        const statusButtons = `
+            <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
                 <span class="member-status ${isPaid ? 'status-paid' : 'status-unpaid'}">${isPaid ? "✅ পরিশোধ" : "⏳ বাকি"}</span>
-                ${!isPaid && phone ? `<a href="${waLink}" target="_blank" class="wa-mini-btn">💬 রিমাইন্ডার</a>` : ""}
-                ${isAdmin ? `<div style="margin-left:auto;display:flex;gap:4px;">
-                    <button class="edit-member-btn action-btn-edit" data-id="${m.id}" data-name="${m.name}" data-due="${due}" data-phone="${phone}">✏️</button>
-                    <button class="del-member-btn action-btn-del" data-id="${m.id}">🗑️</button>
+                ${!isPaid && phone ? `<a href="${waLink}" target="_blank" class="wa-mini-btn" title="WhatsApp রিমাইন্ডার">💬 WA</a>` : ""}
+                ${!isPaid && phone ? `<a href="${msgrLink}" target="_blank" class="msgr-mini-btn" title="Messenger রিমাইন্ডার">📨 MSG</a>` : ""}
+                ${isPaid && phone ? `<a href="${waPaidLink}" target="_blank" class="wa-mini-btn" style="background:#dcfce7;color:#15803d;" title="পরিশোধ ধন্যবাদ WA">💬 WA ✓</a>` : ""}
+                ${isPaid && phone ? `<a href="${msgrPaidLink}" target="_blank" class="msgr-mini-btn" title="পরিশোধ ধন্যবাদ MSG">📨 MSG ✓</a>` : ""}
+            </div>`;
+
+        if (isMobile) {
+            // Mobile card layout
+            html += `<div style="padding:12px 14px;border-radius:10px;border:1.5px solid var(--border);${rowBg}margin-bottom:8px;background:var(--card-bg);font-size:13px;" class="ml-row-item">
+                <!-- Name row with serial and order btns -->
+                <div style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;">
+                    <span class="serial-badge" style="flex-shrink:0;">${idx + 1}</span>
+                    <span style="flex:1;">${m.name}</span>
+                    ${isAdmin ? `<div style="display:flex;flex-direction:row;gap:3px;">
+                        <button class="order-btn order-up${idx === 0 ? ' order-disabled' : ''}" data-idx="${idx}" ${idx === 0 ? 'disabled' : ''}>▲</button>
+                        <button class="order-btn order-down${idx === membersData.length - 1 ? ' order-disabled' : ''}" data-idx="${idx}" ${idx === membersData.length - 1 ? 'disabled' : ''}>▼</button>
+                    </div>` : ""}
+                </div>
+                <!-- Info row -->
+                <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--text-secondary);">
+                    <span>💰 পরিশোধ: <strong style="color:#38a169;">৳${paid.toLocaleString("bn-BD")}</strong></span>
+                    <span>🎯 লক্ষ্য: ${due > 0 ? `৳${due.toLocaleString("bn-BD")}` : "—"}</span>
+                    ${showPhoneCol && phone ? `<span>📞 ${phone}</span>` : ""}
+                </div>
+                <!-- Status + action row -->
+                <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                    <span class="member-status ${isPaid ? 'status-paid' : 'status-unpaid'}">${isPaid ? "✅ পরিশোধ" : "⏳ বাকি"}</span>
+                    ${!isPaid && phone ? `<a href="${waLink}" target="_blank" class="wa-mini-btn">💬 WA</a>` : ""}
+                    ${!isPaid && phone ? `<a href="${msgrLink}" target="_blank" class="msgr-mini-btn">📨 MSG</a>` : ""}
+                    ${isPaid && phone ? `<a href="${waPaidLink}" target="_blank" class="wa-mini-btn" style="background:#dcfce7;color:#15803d;">💬 ধন্যবাদ</a>` : ""}
+                    ${isPaid && phone ? `<a href="${msgrPaidLink}" target="_blank" class="msgr-mini-btn">📨 ধন্যবাদ</a>` : ""}
+                    ${isAdmin ? `<div style="margin-left:auto;display:flex;gap:4px;">
+                        <button class="edit-member-btn action-btn-edit" data-id="${m.id}" data-name="${m.name}" data-due="${due}" data-phone="${phone}" data-messenger="${messenger}">✏️</button>
+                        <button class="del-member-btn action-btn-del" data-id="${m.id}">🗑️</button>
+                    </div>` : ""}
+                </div>
+            </div>`;
+        } else {
+            // Desktop grid row
+            html += `<div style="${rowStyle}${rowBg}${rowEven}" class="ml-row-item">
+                <!-- serial -->
+                <div style="display:flex;align-items:center;gap:4px;flex-direction:column;">
+                    <span class="serial-badge">${idx + 1}</span>
+                    ${isAdmin ? `<div style="display:flex;flex-direction:column;gap:1px;">${upBtn}${downBtn}</div>` : ""}
+                </div>
+                <!-- name -->
+                <div style="display:flex;align-items:center;gap:6px;min-width:0;font-weight:600;">
+                    <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${m.name}</span>
+                </div>
+                ${showPhoneCol ? `<div style="font-size:12px;color:var(--text-secondary);">
+                    ${phone ? `<a href="tel:${phone}" style="color:inherit;text-decoration:none;">📞 ${phone}</a>` : '—'}
                 </div>` : ""}
-            </div>
-        </div>`;
+                <!-- paid -->
+                <div><strong style="color:#38a169;">৳${paid.toLocaleString("bn-BD")}</strong></div>
+                <!-- due -->
+                <div style="color:var(--text-secondary);">${due > 0 ? `৳${due.toLocaleString("bn-BD")}` : '—'}</div>
+                <!-- status -->
+                ${statusButtons}
+                <!-- actions -->
+                ${isAdmin ? `<div style="display:flex;gap:4px;align-items:center;">
+                    <button class="edit-member-btn action-btn-edit" data-id="${m.id}" data-name="${m.name}" data-due="${due}" data-phone="${phone}" data-messenger="${messenger}" title="এডিট">✏️</button>
+                    <button class="del-member-btn action-btn-del" data-id="${m.id}" title="মুছুন">🗑️</button>
+                </div>` : ""}
+            </div>`;
+        }
     });
 
-    html += `</div></div>`;
+    html += `</div>`;
     el.innerHTML = html;
 
     // Stats footer
@@ -583,7 +747,12 @@ function renderMembers() {
     }
 
     // সিরিয়াল রিসেট বাটন
-    document.getElementById("fixOrderBtn")?.addEventListener("click", fixAllMemberOrders);
+    const fixBtn = document.getElementById("fixOrderBtn");
+    if (fixBtn) fixBtn.onclick = fixAllMemberOrders;
+
+    // Phone toggle বাটন — onclick দিয়ে (re-render safe)
+    const tBtn = document.getElementById("togglePhoneBtn");
+    if (tBtn) tBtn.onclick = async () => { phoneVisible = !phoneVisible; try { await setDoc(doc(db, "settings", "appConfig"), { phoneVisible }, { merge: true }); } catch (e) { console.error("settings save error", e); } renderMembers(); };
 
     // ▲▼ ক্রম বাটন
     el.querySelectorAll(".order-up").forEach(btn => {
@@ -602,11 +771,11 @@ function renderMembers() {
     });
 
     el.querySelectorAll(".edit-member-btn").forEach(btn => {
-        btn.onclick = () => openEditMemberModal(btn.dataset.id, btn.dataset.name, btn.dataset.due, btn.dataset.phone);
+        btn.onclick = () => openEditMemberModal(btn.dataset.id, btn.dataset.name, btn.dataset.due, btn.dataset.phone, btn.dataset.messenger || "");
     });
 }
 
-function openEditMemberModal(id, name, due, phone) {
+function openEditMemberModal(id, name, due, phone, messenger) {
     let modal = document.getElementById("editMemberModal");
     if (!modal) {
         modal = document.createElement("div");
@@ -626,6 +795,10 @@ function openEditMemberModal(id, name, due, phone) {
                 <label>ফোন নম্বর</label>
                 <input id="editMemberPhone" style="width:100%;padding:10px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg3);color:var(--text);font-family:var(--font);">
             </div>
+            <div class="form-group" style="margin:12px 0">
+                <label>📨 Messenger ID / Username</label>
+                <input id="editMemberMessenger" placeholder="username বা profile ID" style="width:100%;padding:10px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg3);color:var(--text);font-family:var(--font);">
+            </div>
             <div class="modal-btns">
                 <button id="saveEditMemberBtn" class="btn-primary">✅ সংরক্ষণ করুন</button>
                 <button onclick="document.getElementById('editMemberModal').style.display='none'" class="btn-danger">বাতিল</button>
@@ -636,6 +809,7 @@ function openEditMemberModal(id, name, due, phone) {
     document.getElementById("editMemberName").value = name;
     document.getElementById("editMemberDue").value = due;
     document.getElementById("editMemberPhone").value = phone;
+    document.getElementById("editMemberMessenger").value = messenger || "";
     modal.style.display = "flex";
     modal.dataset.editId = id;
 
@@ -645,7 +819,8 @@ function openEditMemberModal(id, name, due, phone) {
         const newPhone = document.getElementById("editMemberPhone").value.trim();
         if (!newName) { showMsg("⚠️ নাম আবশ্যক!", "error"); return; }
         try {
-            await updateDoc(doc(db, "members", modal.dataset.editId), { name: newName, due: newDue, phone: newPhone });
+            const newMessenger = document.getElementById("editMemberMessenger").value.trim();
+            await updateDoc(doc(db, "members", modal.dataset.editId), { name: newName, due: newDue, phone: newPhone, messenger: newMessenger });
             modal.style.display = "none";
             showMsg("✅ সদস্য আপডেট হয়েছে!");
             addLog("✏️", `সদস্য এডিট: ${newName}`);
@@ -696,10 +871,12 @@ document.getElementById("saveMemberBtn")?.addEventListener("click", async () => 
     if (warn) warn.remove();
 
     try {
-        await addDoc(collection(db, "members"), { name, due, phone, order: membersData.length });
+        const messenger_id = document.getElementById("memberMessenger").value.trim();
+        await addDoc(collection(db, "members"), { name, due, phone, messenger: messenger_id, order: membersData.length });
         document.getElementById("memberName").value = "";
         document.getElementById("memberDue").value = "";
         document.getElementById("memberPhone").value = "";
+        document.getElementById("memberMessenger").value = "";
         showMsg("✅ সদস্য যোগ হয়েছে!");
         addLog("👥", `নতুন সদস্য যোগ: ${name}`);
     } catch (err) {
@@ -1454,6 +1631,15 @@ function showWhatsAppModal(entry) {
     const msg = `🎉 নতুন পেমেন্ট হয়েছে!\n\nনাম: ${entry.name}\nটাকা: ৳${Number(entry.amount).toLocaleString()}\nমাধ্যম: ${getMethodLabel(entry.category)}\nতারিখ: ${entry.date}\n\nটাকা ম্যানেজার অ্যাপ`;
     document.getElementById("whatsappMsgPreview").textContent = msg;
     pendingEntryForWA = entry;
+
+    // সদস্যের ফোন নম্বর auto-fill করো
+    const member = membersData.find(m => m.name.toLowerCase() === entry.name.toLowerCase());
+    const memberPhone = member?.phone || "";
+    const waInput = document.getElementById("waPhoneInput");
+    if (memberPhone) {
+        waInput.value = `88${memberPhone}`;
+    }
+
     document.getElementById("whatsappModal").style.display = "flex";
 
     document.getElementById("waSendLink").onclick = () => {
@@ -1486,11 +1672,84 @@ document.getElementById("saveBtn").onclick = async () => {
         document.getElementById("note").value = "";
         addLog("➕", `নতুন এন্ট্রি: "${name}" — ${fmtAmount(amount)} (${getMethodLabel(category)})`);
         showMsg("✅ সফলভাবে যোগ হয়েছে!", "success");
+
+        // নতুন নাম হলে সদস্য তালিকায় যোগ করার অফার
+        if (type === "income") {
+            const existingMember = membersData.find(m => m.name.trim().toLowerCase() === name.toLowerCase());
+            if (!existingMember) {
+                showAddMemberPrompt(name);
+            }
+        }
+
         if (notifyWA === "yes") {
             showWhatsAppModal({ name, amount: Number(amount), date, type, category, note });
+        } else if (notifyWA === "messenger") {
+            showMessengerModal({ name, amount: Number(amount), date, category });
         }
     } catch { showMsg("❌ যোগ করা যায়নি!", "error"); }
 };
+
+// নতুন নাম পাওয়া গেলে সদস্য যোগের popup
+function showAddMemberPrompt(name) {
+    let el = document.getElementById("addMemberPrompt");
+    if (el) el.remove();
+    el = document.createElement("div");
+    el.id = "addMemberPrompt";
+    el.style.cssText = `position:fixed;bottom:80px;right:20px;z-index:9998;background:var(--card-bg);border:1.5px solid #3182ce;border-radius:12px;padding:14px 16px;box-shadow:0 4px 20px rgba(0,0,0,0.2);font-family:var(--font);max-width:300px;`;
+    el.innerHTML = `<div style="font-size:14px;font-weight:600;margin-bottom:8px;">👤 নতুন নাম পাওয়া গেছে!</div>
+        <div style="font-size:13px;color:var(--text-secondary);margin-bottom:10px;">"<strong>${name}</strong>" সদস্য তালিকায় নেই। যোগ করবেন?</div>
+        <div style="display:flex;gap:8px;">
+            <button id="addMemberYes" style="background:#3182ce;color:#fff;border:none;padding:6px 14px;border-radius:8px;cursor:pointer;font-family:var(--font);font-size:13px;font-weight:600;">✅ যোগ করুন</button>
+            <button id="addMemberNo" style="background:var(--bg3);border:1.5px solid var(--border);padding:6px 14px;border-radius:8px;cursor:pointer;font-family:var(--font);font-size:13px;">না</button>
+        </div>`;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 15000); // ১৫ সেকেন্ড পর auto close
+
+    document.getElementById("addMemberYes").onclick = async () => {
+        try {
+            await addDoc(collection(db, "members"), { name, due: 0, phone: "", messenger: "", order: membersData.length });
+            showMsg(`✅ "${name}" সদস্য তালিকায় যোগ হয়েছে!`, "success");
+            addLog("👥", `স্বয়ংক্রিয় সদস্য যোগ: ${name}`);
+        } catch { showMsg("❌ সদস্য যোগ করা যায়নি!", "error"); }
+        el.remove();
+    };
+    document.getElementById("addMemberNo").onclick = () => el.remove();
+}
+
+// Messenger notification modal
+function showMessengerModal(entry) {
+    const member = membersData.find(m => m.name.trim().toLowerCase() === entry.name.toLowerCase());
+    const messenger = member?.messenger || "";
+    const phone = member?.phone || "";
+    const msg = `🎉 নতুন পেমেন্ট হয়েছে!\n\nনাম: ${entry.name}\nটাকা: ৳${Number(entry.amount).toLocaleString()}\nমাধ্যম: ${getMethodLabel(entry.category)}\nতারিখ: ${entry.date}\n\nটাকা ম্যানেজার অ্যাপ`;
+
+    // Show preview in modal
+    document.getElementById("messengerMsgPreview").textContent = msg;
+
+    // Auto-fill messenger ID or phone
+    const msgrInput = document.getElementById("msgrIdInput");
+    if (messenger) {
+        msgrInput.value = messenger;
+    } else if (phone) {
+        msgrInput.value = `88${phone}`;
+    } else {
+        msgrInput.value = "";
+    }
+
+    document.getElementById("messengerModal").style.display = "flex";
+
+    document.getElementById("msgrSendLink").onclick = () => {
+        const id = document.getElementById("msgrIdInput").value.trim();
+        if (!id) { showMsg("⚠️ Messenger ID বা ফোন দিন!", "error"); return; }
+        const encoded = encodeURIComponent(msg);
+        document.getElementById("msgrSendLink").href = `https://m.me/${id}?text=${encoded}`;
+        setTimeout(() => { document.getElementById("messengerModal").style.display = "none"; }, 500);
+    };
+}
+
+document.getElementById("msgrSkip")?.addEventListener("click", () => {
+    document.getElementById("messengerModal").style.display = "none";
+});
 
 // ===== UPDATE DATA =====
 document.getElementById("updateBtn").onclick = async () => {
@@ -1597,3 +1856,14 @@ document.getElementById("noteViewModal").onclick = (e) => {
 document.getElementById("paymentCopyArea").onclick = () => {
     navigator.clipboard.writeText("01893454283").then(() => showMsg("📋 নাম্বার কপি হয়েছে!", "success"));
 };
+
+// ===== RESPONSIVE RESIZE =====
+let resizeTimer;
+window.addEventListener("resize", () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+        if (document.getElementById("page-members")?.classList.contains("active")) {
+            renderMembers();
+        }
+    }, 200);
+});

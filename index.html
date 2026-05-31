@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="bn" data-theme="light">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,553 +8,664 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a56db">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Tiro+Bangla&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Tiro+Bangla&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-<!-- ===== SIDEBAR ===== -->
-<aside class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-        <div class="sidebar-logo">
-            <span class="logo-icon">💰</span>
-            <span class="logo-text">টাকা ম্যানেজার</span>
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <span class="logo-icon">💰</span>
+                <span class="logo-text">টাকা ম্যানেজার</span>
+            </div>
+            <button class="sidebar-close" id="sidebarClose">✕</button>
         </div>
-        <button class="sidebar-close" id="sidebarClose">✕</button>
-    </div>
-    <nav class="sidebar-nav">
-        <a href="#" class="nav-item active" data-page="dashboard">
-            <span class="nav-icon">📊</span><span>ড্যাশবোর্ড</span>
-        </a>
-        <a href="#" class="nav-item" data-page="income">
-            <span class="nav-icon">🟢</span><span>জমার তালিকা</span>
-        </a>
-        <a href="#" class="nav-item" data-page="expense">
-            <span class="nav-icon">🔴</span><span>খরচের তালিকা</span>
-        </a>
-        <a href="#" class="nav-item" data-page="members">
-            <span class="nav-icon">👥</span><span>সদস্য তালিকা</span>
-        </a>
-        <a href="#" class="nav-item" data-page="budget">
-            <span class="nav-icon">🎯</span><span>বাজেট প্ল্যানার</span>
-        </a>
-        <a href="#" class="nav-item" data-page="report">
-            <span class="nav-icon">📈</span><span>রিপোর্ট ও চার্ট</span>
-        </a>
-        <a href="#" class="nav-item" data-page="payment">
-            <span class="nav-icon">💳</span><span>পেমেন্ট</span>
-        </a>
-        <a href="#" class="nav-item" data-page="log" id="logNavItem" style="display:none;">
-            <span class="nav-icon">📋</span><span>অ্যাক্টিভিটি লগ</span>
-        </a>
-    </nav>
-    <div class="sidebar-footer">
-        <button id="themeToggle" class="theme-btn">🌙 ডার্ক মোড</button>
-        <button id="adminBtn" class="admin-btn-side">🔐 Login</button>
-        <button id="logoutBtn" class="logout-btn-side" style="display:none;">🚪 Logout</button>
-    </div>
-</aside>
-
-<!-- ===== OVERLAY ===== -->
-<div class="overlay" id="overlay"></div>
-
-<!-- ===== MAIN ===== -->
-<div class="main-wrapper">
-
-    <!-- TOP BAR -->
-    <header class="topbar">
-        <button class="hamburger" id="hamburger">☰</button>
-        <h1 class="topbar-title">ড্যাশবোর্ড</h1>
-        <div class="topbar-right">
-            <span id="adminBadge" class="badge-admin" style="display:none;">👑 Admin</span>
+        <nav class="sidebar-nav">
+            <a href="#" class="nav-item active" data-page="dashboard">
+                <span class="nav-icon">📊</span><span>ড্যাশবোর্ড</span>
+            </a>
+            <a href="#" class="nav-item" data-page="income">
+                <span class="nav-icon">🟢</span><span>জমার তালিকা</span>
+            </a>
+            <a href="#" class="nav-item" data-page="expense">
+                <span class="nav-icon">🔴</span><span>খরচের তালিকা</span>
+            </a>
+            <a href="#" class="nav-item" data-page="members">
+                <span class="nav-icon">👥</span><span>সদস্য তালিকা</span>
+            </a>
+            <a href="#" class="nav-item" data-page="budget">
+                <span class="nav-icon">🎯</span><span>বাজেট প্ল্যানার</span>
+            </a>
+            <a href="#" class="nav-item" data-page="report">
+                <span class="nav-icon">📈</span><span>রিপোর্ট ও চার্ট</span>
+            </a>
+            <a href="#" class="nav-item" data-page="payment">
+                <span class="nav-icon">💳</span><span>পেমেন্ট</span>
+            </a>
+            <a href="#" class="nav-item" data-page="log" id="logNavItem" style="display:none;">
+                <span class="nav-icon">📋</span><span>অ্যাক্টিভিটি লগ</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <button id="themeToggle" class="theme-btn">🌙 ডার্ক মোড</button>
+            <button id="adminBtn" class="admin-btn-side">🔐 Login</button>
+            <button id="logoutBtn" class="logout-btn-side" style="display:none;">🚪 Logout</button>
         </div>
-    </header>
+    </aside>
 
-    <!-- PAGES -->
-    <main class="content">
+    <!-- ===== OVERLAY ===== -->
+    <div class="overlay" id="overlay"></div>
 
-        <!-- ===== PAGE: DASHBOARD ===== -->
-        <div class="page active" id="page-dashboard">
+    <!-- ===== MAIN ===== -->
+    <div class="main-wrapper">
 
-            <!-- Summary Cards -->
-            <div class="cards-grid">
-                <div class="card card-income">
-                    <div class="card-icon">📥</div>
-                    <div class="card-info">
-                        <div class="card-label">মোট জমা</div>
-                        <div class="card-value" id="dashIncome">৳ 0</div>
-                    </div>
-                </div>
-                <div class="card card-expense">
-                    <div class="card-icon">📤</div>
-                    <div class="card-info">
-                        <div class="card-label">মোট খরচ</div>
-                        <div class="card-value" id="dashExpense">৳ 0</div>
-                    </div>
-                </div>
-                <div class="card card-balance">
-                    <div class="card-icon">💵</div>
-                    <div class="card-info">
-                        <div class="card-label">বর্তমান ব্যালেন্স</div>
-                        <div class="card-value" id="dashBalance">৳ 0</div>
-                    </div>
-                </div>
-                <div class="card card-entries">
-                    <div class="card-icon">📝</div>
-                    <div class="card-info">
-                        <div class="card-label">মোট এন্ট্রি</div>
-                        <div class="card-value" id="dashEntries">0</div>
-                    </div>
-                </div>
+        <!-- TOP BAR -->
+        <header class="topbar">
+            <button class="hamburger" id="hamburger">☰</button>
+            <h1 class="topbar-title">ড্যাশবোর্ড</h1>
+            <div class="topbar-right">
+                <span id="adminBadge" class="badge-admin" style="display:none;">👑 Admin</span>
             </div>
+        </header>
 
-            <!-- Method Balance Cards -->
-            <div class="section-card">
-                <div class="section-header"><h3>💳 মাধ্যম অনুযায়ী ব্যালেন্স</h3></div>
-                <div id="methodBalanceGrid" class="method-balance-grid"></div>
-            </div>
+        <!-- PAGES -->
+        <main class="content">
 
-            <!-- Filter Row -->
-            <div class="filter-bar">
-                <div class="filter-group">
-                    <label>মাস ফিল্টার</label>
-                    <select id="monthFilter">
-                        <option value="">সব মাস</option>
-                    </select>
+            <!-- ===== PAGE: DASHBOARD ===== -->
+            <div class="page active" id="page-dashboard">
+
+                <!-- Summary Cards -->
+                <div class="cards-grid">
+                    <div class="card card-income">
+                        <div class="card-icon">📥</div>
+                        <div class="card-info">
+                            <div class="card-label">মোট জমা</div>
+                            <div class="card-value" id="dashIncome">৳ 0</div>
+                        </div>
+                    </div>
+                    <div class="card card-expense">
+                        <div class="card-icon">📤</div>
+                        <div class="card-info">
+                            <div class="card-label">মোট খরচ</div>
+                            <div class="card-value" id="dashExpense">৳ 0</div>
+                        </div>
+                    </div>
+                    <div class="card card-balance">
+                        <div class="card-icon">💵</div>
+                        <div class="card-info">
+                            <div class="card-label">বর্তমান ব্যালেন্স</div>
+                            <div class="card-value" id="dashBalance">৳ 0</div>
+                        </div>
+                    </div>
+                    <div class="card card-entries">
+                        <div class="card-icon">📝</div>
+                        <div class="card-info">
+                            <div class="card-label">মোট এন্ট্রি</div>
+                            <div class="card-value" id="dashEntries">0</div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="filter-group">
-                    <label>পেমেন্ট মাধ্যম</label>
-                    <select id="categoryFilter">
-                        <option value="">সব মাধ্যম</option>
-                        <option value="bkash">বিকাশ</option>
-                        <option value="nagad">নগদ</option>
-                        <option value="rocket">রকেট</option>
-                        <option value="cash">ক্যাশ</option>
-                        <option value="bank">ব্যাংক</option>
-                        <option value="other">অন্যান্য</option>
-                    </select>
-                </div>
-                <div class="filter-group search-group">
-                    <label>সার্চ</label>
-                    <input type="text" id="searchInput" placeholder="🔍 নাম বা বিবরণ লিখুন...">
-                </div>
-                <button class="btn-clear-filter" id="clearFilter">✕ ক্লিয়ার</button>
-            </div>
 
-            <!-- Add Form (Admin Only) -->
-            <div id="formBox" class="form-card" style="display:none;">
-                <h3 class="form-title">➕ নতুন এন্ট্রি যোগ করুন</h3>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>নাম / বিবরণ *</label>
-                        <input id="name" placeholder="যেমন: মাসিক বেতন">
-                    </div>
-                    <div class="form-group">
-                        <label>টাকার পরিমাণ *</label>
-                        <input id="amount" type="number" placeholder="0">
-                    </div>
-                    <div class="form-group">
-                        <label>তারিখ *</label>
-                        <input id="date" type="date">
-                    </div>
-                    <div class="form-group">
-                        <label>ধরন</label>
-                        <select id="type">
-                            <option value="income">🟢 টাকা জমা</option>
-                            <option value="expense">🔴 টাকা খরচ</option>
+
+                <!-- Filter Row -->
+                <div class="filter-bar">
+                    <div class="filter-group">
+                        <label>মাস ফিল্টার</label>
+                        <select id="monthFilter">
+                            <option value="">সব মাস</option>
                         </select>
                     </div>
-                    <div class="form-group">
+
+                    <div class="filter-group">
                         <label>পেমেন্ট মাধ্যম</label>
-                        <select id="category">
-                            <option value="bkash">📱 বিকাশ</option>
-                            <option value="nagad">📱 নগদ</option>
-                            <option value="rocket">📱 রকেট</option>
-                            <option value="cash">💵 ক্যাশ</option>
-                            <option value="bank">🏦 ব্যাংক</option>
-                            <option value="other">📦 অন্যান্য</option>
+                        <select id="categoryFilter">
+                            <option value="">সব মাধ্যম</option>
+                            <option value="bkash">বিকাশ</option>
+                            <option value="nagad">নগদ</option>
+                            <option value="rocket">রকেট</option>
+                            <option value="cash">ক্যাশ</option>
+                            <option value="bank">ব্যাংক</option>
+                            <option value="other">অন্যান্য</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label>WhatsApp নোটিফিকেশন</label>
-                        <select id="whatsappNotify">
-                            <option value="yes">✅ পাঠাও</option>
-                            <option value="no">❌ পাঠাবো না</option>
-                        </select>
+                    <div class="filter-group search-group">
+                        <label>সার্চ</label>
+                        <input type="text" id="searchInput" placeholder="🔍 নাম বা বিবরণ লিখুন...">
                     </div>
+                    <button class="btn-clear-filter" id="clearFilter">✕ ক্লিয়ার</button>
                 </div>
-                <div class="form-group full-width">
-                    <label>নোট (ঐচ্ছিক)</label>
-                    <textarea id="note" placeholder="📝 বিস্তারিত নোট লিখুন..." rows="2"></textarea>
-                </div>
-                <button id="saveBtn" class="btn-primary">✅ যোগ করুন</button>
-            </div>
 
-            <!-- Income Table -->
-            <div class="section-card">
-                <div class="section-header">
-                    <h3>🟢 টাকা জমা</h3>
-                    <div class="header-btns">
-                        <button class="btn-export btn-pdf-income" id="pdfIncomeBtn">🖨️ PDF</button>
-                        <button class="btn-export" id="exportIncomeBtn">⬇️ CSV</button>
+                <!-- Add Form (Admin Only) -->
+                <div id="formBox" class="form-card" style="display:none;">
+                    <h3 class="form-title">➕ নতুন এন্ট্রি যোগ করুন</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>নাম / বিবরণ *</label>
+                            <input id="name" placeholder="যেমন: মাসিক বেতন" autocomplete="off" list="memberSuggestions">
+                            <datalist id="memberSuggestions"></datalist>
+                        </div>
+                        <div class="form-group">
+                            <label>টাকার পরিমাণ *</label>
+                            <input id="amount" type="number" placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label>তারিখ *</label>
+                            <input id="date" type="date">
+                        </div>
+                        <div class="form-group">
+                            <label>ধরন</label>
+                            <select id="type">
+                                <option value="income">🟢 টাকা জমা</option>
+                                <option value="expense">🔴 টাকা খরচ</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>পেমেন্ট মাধ্যম</label>
+                            <select id="category">
+                                <option value="bkash">📱 বিকাশ</option>
+                                <option value="nagad">📱 নগদ</option>
+                                <option value="rocket">📱 রকেট</option>
+                                <option value="cash">💵 ক্যাশ</option>
+                                <option value="bank">🏦 ব্যাংক</option>
+                                <option value="other">📦 অন্যান্য</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>নোটিফিকেশন পাঠান</label>
+                            <select id="whatsappNotify">
+                                <option value="no">❌ পাঠাবো না</option>
+                                <option value="yes">💬 WhatsApp</option>
+                                <option value="messenger">📨 Messenger</option>
+                            </select>
+                        </div>
                     </div>
+                    <div class="form-group full-width">
+                        <label>নোট (ঐচ্ছিক)</label>
+                        <textarea id="note" placeholder="📝 বিস্তারিত নোট লিখুন..." rows="2"></textarea>
+                    </div>
+                    <button id="saveBtn" class="btn-primary">✅ যোগ করুন</button>
                 </div>
-                <div class="table-wrap">
-                    <table id="incomeTable">
-                        <thead>
-                            <tr>
-                                <th>নাম</th>
-                                <th>টাকা</th>
-                                <th>তারিখ</th>
-                                <th>পেমেন্ট মাধ্যম</th>
-                                <th class="note-col">নোট</th>
-                                <th class="receipt-col">রিসিট</th>
-                                <th class="admin-col">অ্যাকশন</th>
-                            </tr>
-                        </thead>
-                        <tbody id="incomeList">
-                            <tr class="skeleton-row"><td colspan="7"><div class="skeleton"></div></td></tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="table-footer">
-                    <div class="total-label">মোট জমা: <span class="total-amount income-color" id="incomeTotal">৳ 0</span></div>
-                </div>
-            </div>
 
-            <!-- Expense Table -->
-            <div class="section-card">
-                <div class="section-header">
-                    <h3>🔴 টাকা খরচ</h3>
-                    <div class="header-btns">
-                        <button class="btn-export btn-pdf-expense" id="pdfExpenseBtn">🖨️ PDF</button>
-                        <button class="btn-export" id="exportExpenseBtn">⬇️ CSV</button>
-                    </div>
-                </div>
-                <div class="table-wrap">
-                    <table id="expenseTable">
-                        <thead>
-                            <tr>
-                                <th>নাম</th>
-                                <th>টাকা</th>
-                                <th>তারিখ</th>
-                                <th>পেমেন্ট মাধ্যম</th>
-                                <th class="note-col">নোট</th>
-                                <th class="receipt-col">রিসিট</th>
-                                <th class="admin-col">অ্যাকশন</th>
-                            </tr>
-                        </thead>
-                        <tbody id="expenseList">
-                            <tr class="skeleton-row"><td colspan="7"><div class="skeleton"></div></td></tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="table-footer">
-                    <div class="total-label">মোট খরচ: <span class="total-amount expense-color" id="expenseTotal">৳ 0</span></div>
-                </div>
-            </div>
-
-            <div class="balance-card">
-                <div class="balance-label">💵 খরচের পর বর্তমান ব্যালেন্স</div>
-                <div class="balance-amount" id="balance">৳ 0</div>
-            </div>
-        </div>
-
-        <!-- ===== PAGE: INCOME ===== -->
-        <div class="page" id="page-income">
-            <div class="section-card">
-                <div class="section-header">
-                    <h3>🟢 সকল জমার তালিকা</h3>
-                    <div class="header-btns">
-                        <button class="btn-export btn-pdf-income" id="pdfIncomeFullBtn">🖨️ PDF Export</button>
-                        <button class="btn-export" id="exportIncomeFullBtn">⬇️ CSV</button>
-                    </div>
-                </div>
-                <div class="table-wrap">
-                    <table>
-                        <thead><tr>
-                            <th>নাম</th><th>টাকা</th><th>তারিখ</th><th>পেমেন্ট মাধ্যম</th>
-                            <th class="note-col">নোট</th><th class="receipt-col">রিসিট</th><th class="admin-col">অ্যাকশন</th>
-                        </tr></thead>
-                        <tbody id="incomeListFull"></tbody>
-                    </table>
-                </div>
-                <div class="table-footer">
-                    <div class="total-label">মোট জমা: <span class="total-amount income-color" id="incomeTotalFull">৳ 0</span></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ===== PAGE: EXPENSE ===== -->
-        <div class="page" id="page-expense">
-            <div class="section-card">
-                <div class="section-header">
-                    <h3>🔴 সকল খরচের তালিকা</h3>
-                    <div class="header-btns">
-                        <button class="btn-export btn-pdf-expense" id="pdfExpenseFullBtn">🖨️ PDF Export</button>
-                        <button class="btn-export" id="exportExpenseFullBtn">⬇️ CSV</button>
-                    </div>
-                </div>
-                <div class="table-wrap">
-                    <table>
-                        <thead><tr>
-                            <th>নাম</th><th>টাকা</th><th>তারিখ</th><th>পেমেন্ট মাধ্যম</th>
-                            <th class="note-col">নোট</th><th class="receipt-col">রিসিট</th><th class="admin-col">অ্যাকশন</th>
-                        </tr></thead>
-                        <tbody id="expenseListFull"></tbody>
-                    </table>
-                </div>
-                <div class="table-footer">
-                    <div class="total-label">মোট খরচ: <span class="total-amount expense-color" id="expenseTotalFull">৳ 0</span></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ===== PAGE: MEMBERS ===== -->
-        <div class="page" id="page-members">
-            <div class="section-card" id="adminMembersForm" style="display:none;">
-                <div class="section-header"><h3>➕ নতুন সদস্য যোগ করুন</h3></div>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>সদস্যের নাম *</label>
-                        <input id="memberName" placeholder="নাম লিখুন">
-                    </div>
-                    <div class="form-group">
-                        <label>মাসিক বাধ্যতামূলক পরিমাণ (৳)</label>
-                        <input id="memberDue" type="number" placeholder="যেমন: 500">
-                    </div>
-                    <div class="form-group">
-                        <label>ফোন নম্বর</label>
-                        <input id="memberPhone" placeholder="01XXXXXXXXX">
-                    </div>
-                </div>
-                <button id="saveMemberBtn" class="btn-primary">✅ সদস্য যোগ করুন</button>
-            </div>
-
-            <div class="section-card">
-                <div class="section-header">
-                    <h3>👥 সদস্য তালিকা</h3>
-                    <div class="header-btns">
-                        <input type="month" id="memberMonthFilter" style="padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--card-bg);color:var(--text);">
-                    </div>
-                </div>
-                <div id="memberStats" style="padding:8px 4px 10px;font-size:13px;color:var(--text-secondary);border-bottom:1px solid var(--border);margin-bottom:8px;"></div>
-                <div id="membersList"></div>
-            </div>
-        </div>
-
-        <!-- ===== PAGE: BUDGET ===== -->
-        <div class="page" id="page-budget">
-            <div class="section-card" id="adminBudgetForm" style="display:none;">
-                <div class="section-header"><h3>🎯 নতুন বাজেট সেট করুন</h3></div>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>মাস *</label>
-                        <input id="budgetMonth" type="month">
-                    </div>
-                    <div class="form-group">
-                        <label>লক্ষ্যমাত্রা আয় (৳)</label>
-                        <input id="budgetIncome" type="number" placeholder="0">
-                    </div>
-                    <div class="form-group">
-                        <label>সর্বোচ্চ খরচ সীমা (৳)</label>
-                        <input id="budgetExpense" type="number" placeholder="0">
-                    </div>
-                    <div class="form-group">
-                        <label>বিবরণ</label>
-                        <input id="budgetNote" placeholder="যেমন: এপ্রিল মাসের বাজেট">
-                    </div>
-                </div>
-                <button id="saveBudgetBtn" class="btn-primary">✅ বাজেট সেভ করুন</button>
-            </div>
-
-            <div id="budgetList" class="budget-list"></div>
-        </div>
-
-        <!-- ===== PAGE: REPORT ===== -->
-        <div class="page" id="page-report">
-            <div class="cards-grid">
-                <div class="card card-income"><div class="card-icon">📥</div><div class="card-info"><div class="card-label">এই মাসে জমা</div><div class="card-value" id="rptMonthIncome">৳ 0</div></div></div>
-                <div class="card card-expense"><div class="card-icon">📤</div><div class="card-info"><div class="card-label">এই মাসে খরচ</div><div class="card-value" id="rptMonthExpense">৳ 0</div></div></div>
-                <div class="card card-balance"><div class="card-icon">💵</div><div class="card-info"><div class="card-label">এই মাসে ব্যালেন্স</div><div class="card-value" id="rptMonthBalance">৳ 0</div></div></div>
-            </div>
-
-            <div class="charts-grid">
+                <!-- Income Table -->
                 <div class="section-card">
-                    <div class="section-header"><h3>📊 মাসওয়ারি আয়-ব্যয়</h3></div>
-                    <canvas id="barChart" height="250"></canvas>
+                    <div class="section-header">
+                        <h3>🟢 টাকা জমা</h3>
+                        <div class="header-btns">
+                            <button class="btn-export btn-pdf-income" id="pdfIncomeBtn">🖨️ PDF</button>
+                            <button class="btn-export" id="exportIncomeBtn">⬇️ CSV</button>
+                        </div>
+                    </div>
+                    <div class="table-wrap">
+                        <table id="incomeTable">
+                            <thead>
+                                <tr>
+                                    <th>নাম</th>
+                                    <th>টাকা</th>
+                                    <th>তারিখ</th>
+                                    <th>পেমেন্ট মাধ্যম</th>
+                                    <th class="note-col">নোট</th>
+                                    <th class="receipt-col">রিসিট</th>
+                                    <th class="admin-col">অ্যাকশন</th>
+                                </tr>
+                            </thead>
+                            <tbody id="incomeList">
+                                <tr class="skeleton-row">
+                                    <td colspan="7">
+                                        <div class="skeleton"></div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="table-footer">
+                        <div class="total-label">মোট জমা: <span class="total-amount income-color" id="incomeTotal">৳
+                                0</span></div>
+                    </div>
                 </div>
+
+
+                <!-- Method Balance Cards -->
                 <div class="section-card">
-                    <div class="section-header"><h3>🥧 মাধ্যম অনুযায়ী লেনদেন</h3></div>
-                    <canvas id="pieChart" height="250"></canvas>
-                </div>
-            </div>
-
-            <div class="section-card">
-                <div class="section-header">
-                    <h3>📥 রিপোর্ট ডাউনলোড</h3>
-                </div>
-                <div class="export-btns">
-                    <button class="btn-primary" id="exportPDF">🖨️ সম্পূর্ণ PDF</button>
-                    <button class="btn-success" id="exportCSV">📊 CSV ডাউনলোড</button>
-                    <button class="btn-warn" id="printReport">🖨️ প্রিন্ট করুন</button>
-                </div>
-            </div>
-
-            <!-- Payment Method Summary -->
-            <div class="section-card">
-                <div class="section-header"><h3>💳 মাধ্যম ভিত্তিক সারাংশ</h3></div>
-                <div id="categorySummary" class="category-grid"></div>
-            </div>
-        </div>
-
-        <!-- ===== PAGE: PAYMENT ===== -->
-        <div class="page" id="page-payment">
-            <div class="payment-hero">
-                <div class="payment-title">💳 পেমেন্ট করুন</div>
-                <div id="paymentCopyArea" class="payment-number-box">
-                    <div class="payment-icons">
-                        <img src="image/BKash2.png" alt="bKash">
-                        <img src="image/Nagad-Logo.svg" alt="Nagad">
-                        <img src="image/rocket.png" alt="Rocket">
+                    <div class="section-header">
+                        <h3>💳 মাধ্যম অনুযায়ী ব্যালেন্স</h3>
                     </div>
-                    <div class="phone-display">
-                        📱 <span id="phoneNum">01893454283</span>
-                        <span class="copy-hint">📋 ট্যাপ করে কপি করুন</span>
+                    <div id="methodBalanceGrid" class="method-balance-grid"></div>
+                </div>
+
+
+                <!-- Expense Table -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <h3>🔴 টাকা খরচ</h3>
+                        <div class="header-btns">
+                            <button class="btn-export btn-pdf-expense" id="pdfExpenseBtn">🖨️ PDF</button>
+                            <button class="btn-export" id="exportExpenseBtn">⬇️ CSV</button>
+                        </div>
                     </div>
-                    <div class="payment-method-label">বিকাশ / নগদ / রকেট (পার্সোনাল)</div>
+                    <div class="table-wrap">
+                        <table id="expenseTable">
+                            <thead>
+                                <tr>
+                                    <th>নাম</th>
+                                    <th>টাকা</th>
+                                    <th>তারিখ</th>
+                                    <th>পেমেন্ট মাধ্যম</th>
+                                    <th class="note-col">নোট</th>
+                                    <th class="receipt-col">রিসিট</th>
+                                    <th class="admin-col">অ্যাকশন</th>
+                                </tr>
+                            </thead>
+                            <tbody id="expenseList">
+                                <tr class="skeleton-row">
+                                    <td colspan="7">
+                                        <div class="skeleton"></div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="table-footer">
+                        <div class="total-label">মোট খরচ: <span class="total-amount expense-color" id="expenseTotal">৳
+                                0</span></div>
+                    </div>
                 </div>
-                <div class="payment-note">⚠️ টাকা পাঠানোর পর Admin কে জানিয়ে দিন।</div>
-                <div class="contact-btns">
-                    <a href="https://m.me/r.Riaz99" target="_blank" class="contact-btn messenger">💬 Messenger</a>
-                    <a href="tel:01893454283" class="contact-btn call">📞 Call</a>
-                    <a href="https://wa.me/8801893454283" target="_blank" class="contact-btn whatsapp">💬 WhatsApp</a>
+
+                <div class="balance-card">
+                    <div class="balance-label">💵 খরচের পর বর্তমান ব্যালেন্স</div>
+                    <div class="balance-amount" id="balance">৳ 0</div>
                 </div>
             </div>
 
-            <!-- Payment History -->
-            <div class="section-card">
-                <div class="section-header"><h3>💳 পেমেন্ট হিস্ট্রি</h3></div>
-                <div class="table-wrap">
-                    <table>
-                        <thead><tr><th>নাম</th><th>টাকা</th><th>তারিখ</th><th>মাধ্যম</th><th class="receipt-col">রিসিট</th><th class="admin-col">অ্যাকশন</th></tr></thead>
-                        <tbody id="paymentHistory"></tbody>
-                    </table>
+            <!-- ===== PAGE: INCOME ===== -->
+            <div class="page" id="page-income">
+                <div class="section-card">
+                    <div class="section-header">
+                        <h3>🟢 সকল জমার তালিকা</h3>
+                        <div class="header-btns">
+                            <button class="btn-export btn-pdf-income" id="pdfIncomeFullBtn">🖨️ PDF Export</button>
+                            <button class="btn-export" id="exportIncomeFullBtn">⬇️ CSV</button>
+                        </div>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>নাম</th>
+                                    <th>টাকা</th>
+                                    <th>তারিখ</th>
+                                    <th>পেমেন্ট মাধ্যম</th>
+                                    <th class="note-col">নোট</th>
+                                    <th class="receipt-col">রিসিট</th>
+                                    <th class="admin-col">অ্যাকশন</th>
+                                </tr>
+                            </thead>
+                            <tbody id="incomeListFull"></tbody>
+                        </table>
+                    </div>
+                    <div class="table-footer">
+                        <div class="total-label">মোট জমা: <span class="total-amount income-color" id="incomeTotalFull">৳
+                                0</span></div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- ===== PAGE: ACTIVITY LOG ===== -->
-        <div class="page" id="page-log">
-            <div class="section-card">
-                <div class="section-header"><h3>📋 অ্যাক্টিভিটি লগ</h3></div>
-                <div id="activityLog" class="log-list"></div>
+            <!-- ===== PAGE: EXPENSE ===== -->
+            <div class="page" id="page-expense">
+                <div class="section-card">
+                    <div class="section-header">
+                        <h3>🔴 সকল খরচের তালিকা</h3>
+                        <div class="header-btns">
+                            <button class="btn-export btn-pdf-expense" id="pdfExpenseFullBtn">🖨️ PDF Export</button>
+                            <button class="btn-export" id="exportExpenseFullBtn">⬇️ CSV</button>
+                        </div>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>নাম</th>
+                                    <th>টাকা</th>
+                                    <th>তারিখ</th>
+                                    <th>পেমেন্ট মাধ্যম</th>
+                                    <th class="note-col">নোট</th>
+                                    <th class="receipt-col">রিসিট</th>
+                                    <th class="admin-col">অ্যাকশন</th>
+                                </tr>
+                            </thead>
+                            <tbody id="expenseListFull"></tbody>
+                        </table>
+                    </div>
+                    <div class="table-footer">
+                        <div class="total-label">মোট খরচ: <span class="total-amount expense-color"
+                                id="expenseTotalFull">৳ 0</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== PAGE: MEMBERS ===== -->
+            <div class="page" id="page-members">
+                <div class="section-card" id="adminMembersForm" style="display:none;">
+                    <div class="section-header">
+                        <h3>➕ নতুন সদস্য যোগ করুন</h3>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>সদস্যের নাম *</label>
+                            <input id="memberName" placeholder="নাম লিখুন">
+                        </div>
+                        <div class="form-group">
+                            <label>মাসিক বাধ্যতামূলক পরিমাণ (৳)</label>
+                            <input id="memberDue" type="number" placeholder="যেমন: 500">
+                        </div>
+                        <div class="form-group">
+                            <label>ফোন নম্বর</label>
+                            <input id="memberPhone" placeholder="01XXXXXXXXX">
+                        </div>
+                        <div class="form-group">
+                            <label>📨 Messenger ID / Username</label>
+                            <input id="memberMessenger" placeholder="যেমন: username বা profile ID">
+                        </div>
+                    </div>
+                    <button id="saveMemberBtn" class="btn-primary">✅ সদস্য যোগ করুন</button>
+                </div>
+
+                <div class="section-card">
+                    <div class="section-header">
+                        <h3>👥 সদস্য তালিকা</h3>
+                        <div class="header-btns">
+                            <input type="month" id="memberMonthFilter"
+                                style="padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--card-bg);color:var(--text);">
+                        </div>
+                    </div>
+                    <div id="memberStats"
+                        style="padding:8px 4px 10px;font-size:13px;color:var(--text-secondary);border-bottom:1px solid var(--border);margin-bottom:8px;">
+                    </div>
+                    <div id="membersList"></div>
+                </div>
+            </div>
+
+            <!-- ===== PAGE: BUDGET ===== -->
+            <div class="page" id="page-budget">
+                <div class="section-card" id="adminBudgetForm" style="display:none;">
+                    <div class="section-header">
+                        <h3>🎯 নতুন বাজেট সেট করুন</h3>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>মাস *</label>
+                            <input id="budgetMonth" type="month">
+                        </div>
+                        <div class="form-group">
+                            <label>লক্ষ্যমাত্রা আয় (৳)</label>
+                            <input id="budgetIncome" type="number" placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label>সর্বোচ্চ খরচ সীমা (৳)</label>
+                            <input id="budgetExpense" type="number" placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label>বিবরণ</label>
+                            <input id="budgetNote" placeholder="যেমন: এপ্রিল মাসের বাজেট">
+                        </div>
+                    </div>
+                    <button id="saveBudgetBtn" class="btn-primary">✅ বাজেট সেভ করুন</button>
+                </div>
+
+                <div id="budgetList" class="budget-list"></div>
+            </div>
+
+            <!-- ===== PAGE: REPORT ===== -->
+            <div class="page" id="page-report">
+                <div class="cards-grid">
+                    <div class="card card-income">
+                        <div class="card-icon">📥</div>
+                        <div class="card-info">
+                            <div class="card-label">এই মাসে জমা</div>
+                            <div class="card-value" id="rptMonthIncome">৳ 0</div>
+                        </div>
+                    </div>
+                    <div class="card card-expense">
+                        <div class="card-icon">📤</div>
+                        <div class="card-info">
+                            <div class="card-label">এই মাসে খরচ</div>
+                            <div class="card-value" id="rptMonthExpense">৳ 0</div>
+                        </div>
+                    </div>
+                    <div class="card card-balance">
+                        <div class="card-icon">💵</div>
+                        <div class="card-info">
+                            <div class="card-label">এই মাসে ব্যালেন্স</div>
+                            <div class="card-value" id="rptMonthBalance">৳ 0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="charts-grid">
+                    <div class="section-card">
+                        <div class="section-header">
+                            <h3>📊 মাসওয়ারি আয়-ব্যয়</h3>
+                        </div>
+                        <canvas id="barChart" height="250"></canvas>
+                    </div>
+                    <div class="section-card">
+                        <div class="section-header">
+                            <h3>🥧 মাধ্যম অনুযায়ী লেনদেন</h3>
+                        </div>
+                        <canvas id="pieChart" height="250"></canvas>
+                    </div>
+                </div>
+
+                <div class="section-card">
+                    <div class="section-header">
+                        <h3>📥 রিপোর্ট ডাউনলোড</h3>
+                    </div>
+                    <div class="export-btns">
+                        <button class="btn-primary" id="exportPDF">🖨️ সম্পূর্ণ PDF</button>
+                        <button class="btn-success" id="exportCSV">📊 CSV ডাউনলোড</button>
+                        <button class="btn-warn" id="printReport">🖨️ প্রিন্ট করুন</button>
+                    </div>
+                </div>
+
+                <!-- Payment Method Summary -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <h3>💳 মাধ্যম ভিত্তিক সারাংশ</h3>
+                    </div>
+                    <div id="categorySummary" class="category-grid"></div>
+                </div>
+            </div>
+
+            <!-- ===== PAGE: PAYMENT ===== -->
+            <div class="page" id="page-payment">
+                <div class="payment-hero">
+                    <div class="payment-title">💳 পেমেন্ট করুন</div>
+                    <div id="paymentCopyArea" class="payment-number-box">
+                        <div class="payment-icons">
+                            <img src="image/BKash2.png" alt="bKash">
+                            <img src="image/Nagad-Logo.svg" alt="Nagad">
+                            <img src="image/rocket.png" alt="Rocket">
+                        </div>
+                        <div class="phone-display">
+                            📱 <span id="phoneNum">01893454283</span>
+                            <span class="copy-hint">📋 ট্যাপ করে কপি করুন</span>
+                        </div>
+                        <div class="payment-method-label">বিকাশ / নগদ / রকেট (পার্সোনাল)</div>
+                    </div>
+                    <div class="payment-note">⚠️ টাকা পাঠানোর পর Admin কে জানিয়ে দিন।</div>
+                    <div class="contact-btns">
+                        <a href="https://m.me/r.Riaz99" target="_blank" class="contact-btn messenger">💬 Messenger</a>
+                        <a href="tel:01893454283" class="contact-btn call">📞 Call</a>
+                        <a href="https://wa.me/8801893454283" target="_blank" class="contact-btn whatsapp">💬
+                            WhatsApp</a>
+                    </div>
+                </div>
+
+                <!-- Payment History -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <h3>💳 পেমেন্ট হিস্ট্রি</h3>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>নাম</th>
+                                    <th>টাকা</th>
+                                    <th>তারিখ</th>
+                                    <th>মাধ্যম</th>
+                                    <th class="receipt-col">রিসিট</th>
+                                    <th class="admin-col">অ্যাকশন</th>
+                                </tr>
+                            </thead>
+                            <tbody id="paymentHistory"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== PAGE: ACTIVITY LOG ===== -->
+            <div class="page" id="page-log">
+                <div class="section-card">
+                    <div class="section-header">
+                        <h3>📋 অ্যাক্টিভিটি লগ</h3>
+                    </div>
+                    <div id="activityLog" class="log-list"></div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- ===== MODALS ===== -->
+
+    <!-- Login Modal -->
+    <div class="modal" id="loginModal">
+        <div class="modal-box">
+            <h3>🔐 Admin Login</h3>
+            <input type="email" id="adminEmail" placeholder="ইমেল">
+            <input type="password" id="adminPass" placeholder="পাসওয়ার্ড">
+            <div class="modal-btns">
+                <button id="loginBtn" class="btn-primary">Login</button>
+                <button id="closeModal" class="btn-danger">বন্ধ করুন</button>
             </div>
         </div>
-
-    </main>
-</div>
-
-<!-- ===== MODALS ===== -->
-
-<!-- Login Modal -->
-<div class="modal" id="loginModal">
-    <div class="modal-box">
-        <h3>🔐 Admin Login</h3>
-        <input type="email" id="adminEmail" placeholder="ইমেল">
-        <input type="password" id="adminPass" placeholder="পাসওয়ার্ড">
-        <div class="modal-btns">
-            <button id="closeModal" class="btn-danger">বন্ধ করুন</button>
-            <button id="loginBtn" class="btn-primary">Login</button>
-        </div>
     </div>
-</div>
 
-<!-- Edit Modal -->
-<div class="modal" id="editModal">
-    <div class="modal-box">
-        <h3>✏️ তথ্য সম্পাদনা</h3>
-        <div class="form-grid">
-            <div class="form-group"><label>নাম</label><input id="editName" placeholder="নাম"></div>
-            <div class="form-group"><label>টাকা</label><input id="editAmount" type="number" placeholder="টাকা"></div>
-            <div class="form-group"><label>তারিখ</label><input id="editDate" type="date"></div>
-            <div class="form-group"><label>ধরন</label>
-                <select id="editType">
-                    <option value="income">🟢 টাকা জমা</option>
-                    <option value="expense">🔴 টাকা খরচ</option>
-                </select>
+    <!-- Edit Modal -->
+    <div class="modal" id="editModal">
+        <div class="modal-box">
+            <h3>✏️ তথ্য সম্পাদনা</h3>
+            <div class="form-grid">
+                <div class="form-group"><label>নাম</label><input id="editName" placeholder="নাম"></div>
+                <div class="form-group"><label>টাকা</label><input id="editAmount" type="number" placeholder="টাকা">
+                </div>
+                <div class="form-group"><label>তারিখ</label><input id="editDate" type="date"></div>
+                <div class="form-group"><label>ধরন</label>
+                    <select id="editType">
+                        <option value="income">🟢 টাকা জমা</option>
+                        <option value="expense">🔴 টাকা খরচ</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>পেমেন্ট মাধ্যম</label>
+                    <select id="editCategory">
+                        <option value="bkash">📱 বিকাশ</option>
+                        <option value="nagad">📱 নগদ</option>
+                        <option value="rocket">📱 রকেট</option>
+                        <option value="cash">💵 ক্যাশ</option>
+                        <option value="bank">🏦 ব্যাংক</option>
+                        <option value="other">📦 অন্যান্য</option>
+                    </select>
+                </div>
             </div>
-            <div class="form-group"><label>পেমেন্ট মাধ্যম</label>
-                <select id="editCategory">
-                    <option value="bkash">📱 বিকাশ</option>
-                    <option value="nagad">📱 নগদ</option>
-                    <option value="rocket">📱 রকেট</option>
-                    <option value="cash">💵 ক্যাশ</option>
-                    <option value="bank">🏦 ব্যাংক</option>
-                    <option value="other">📦 অন্যান্য</option>
-                </select>
+            <div class="form-group full-width"><label>নোট</label>
+                <textarea id="editNote" placeholder="নোট লিখুন..." rows="3"></textarea>
+            </div>
+            <div class="modal-btns">
+                <button id="closeEditModal" class="btn-danger">বাতিল</button>
+                <button id="updateBtn" class="btn-primary">আপডেট করুন</button>
             </div>
         </div>
-        <div class="form-group full-width"><label>নোট</label>
-            <textarea id="editNote" placeholder="নোট লিখুন..." rows="3"></textarea>
-        </div>
-        <div class="modal-btns">
-            <button id="closeEditModal" class="btn-danger">বাতিল</button>
-            <button id="updateBtn" class="btn-primary">আপডেট করুন</button>
+    </div>
+
+    <!-- Note View Modal -->
+    <div class="modal" id="noteViewModal">
+        <div class="modal-box note-view-box">
+            <div class="note-view-header">
+                <span>📝</span>
+                <h3>নোট বিস্তারিত</h3>
+            </div>
+            <div class="note-view-meta" id="noteViewMeta"></div>
+            <div class="note-view-content" id="noteViewContent"></div>
+            <button id="closeNoteView" class="btn-primary" style="margin-top:15px;width:100%;">বন্ধ করুন</button>
         </div>
     </div>
-</div>
 
-<!-- Note View Modal -->
-<div class="modal" id="noteViewModal">
-    <div class="modal-box note-view-box">
-        <div class="note-view-header">
-            <span>📝</span><h3>নোট বিস্তারিত</h3>
-        </div>
-        <div class="note-view-meta" id="noteViewMeta"></div>
-        <div class="note-view-content" id="noteViewContent"></div>
-        <button id="closeNoteView" class="btn-primary" style="margin-top:15px;width:100%;">বন্ধ করুন</button>
-    </div>
-</div>
-
-<!-- Confirm Delete Modal -->
-<div class="modal" id="confirmModal">
-    <div class="modal-box confirm-box">
-        <div class="confirm-icon">🗑️</div>
-        <h3>নিশ্চিত করুন</h3>
-        <p>আপনি কি এই এন্ট্রিটি মুছে ফেলতে চান?</p>
-        <div class="modal-btns">
-            <button id="confirmCancel" class="btn-outline">না, রাখুন</button>
-            <button id="confirmDelete" class="btn-danger">হ্যাঁ, মুছুন</button>
+    <!-- Confirm Delete Modal -->
+    <div class="modal" id="confirmModal">
+        <div class="modal-box confirm-box">
+            <div class="confirm-icon">🗑️</div>
+            <h3>নিশ্চিত করুন</h3>
+            <p>আপনি কি এই এন্ট্রিটি মুছে ফেলতে চান?</p>
+            <div class="modal-btns">
+                <button id="confirmCancel" class="btn-outline">না, রাখুন</button>
+                <button id="confirmDelete" class="btn-danger">হ্যাঁ, মুছুন</button>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- WhatsApp Notify Modal -->
-<div class="modal" id="whatsappModal">
-    <div class="modal-box">
-        <h3>💬 WhatsApp নোটিফিকেশন</h3>
-        <p id="whatsappMsgPreview" style="background:var(--hover-bg);padding:12px;border-radius:8px;margin:12px 0;font-size:14px;line-height:1.6;"></p>
-        <div class="form-group">
-            <label>Admin ফোন নম্বর (WhatsApp)</label>
-            <input id="waPhoneInput" placeholder="8801XXXXXXXXX" value="8801893454283">
-        </div>
-        <div class="modal-btns">
-            <button id="waSkip" class="btn-outline">বাদ দিন</button>
-            <a id="waSendLink" href="#" target="_blank" class="btn-primary" style="text-decoration:none;padding:10px 20px;border-radius:8px;">📲 WhatsApp পাঠান</a>
+    <!-- WhatsApp Notify Modal -->
+    <div class="modal" id="whatsappModal">
+        <div class="modal-box">
+            <h3>💬 WhatsApp নোটিফিকেশন</h3>
+            <p id="whatsappMsgPreview"
+                style="background:var(--hover-bg);padding:12px;border-radius:8px;margin:12px 0;font-size:14px;line-height:1.6;">
+            </p>
+            <div class="form-group">
+                <label>Admin ফোন নম্বর (WhatsApp)</label>
+                <input id="waPhoneInput" placeholder="8801XXXXXXXXX" value="8801893454283">
+            </div>
+            <div class="modal-btns">
+                <button id="waSkip" class="btn-outline">বাদ দিন</button>
+                <a id="waSendLink" href="#" target="_blank" class="btn-primary"
+                    style="text-decoration:none;padding:10px 20px;border-radius:8px;">📲 WhatsApp পাঠান</a>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- Toast -->
-<div id="toast" class="toast"></div>
+    <!-- Messenger Notify Modal -->
+    <div class="modal" id="messengerModal">
+        <div class="modal-box">
+            <h3>📨 Messenger নোটিফিকেশন</h3>
+            <p id="messengerMsgPreview"
+                style="background:var(--hover-bg);padding:12px;border-radius:8px;margin:12px 0;font-size:14px;line-height:1.6;white-space:pre-line;">
+            </p>
+            <div class="form-group">
+                <label>Messenger ID / ফোন নম্বর</label>
+                <input id="msgrIdInput" placeholder="Messenger ID বা ফোন নম্বর">
+            </div>
+            <div class="modal-btns">
+                <button id="msgrSkip" class="btn-outline">বাদ দিন</button>
+                <a id="msgrSendLink" href="#" target="_blank" class="btn-primary"
+                    style="text-decoration:none;padding:10px 20px;border-radius:8px;">📨 Messenger পাঠান</a>
+            </div>
+        </div>
+    </div>
 
-<!-- Chart.js CDN -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<!-- jsPDF for PDF export -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-<script type="module" src="app.js"></script>
+    <!-- Toast -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- jsPDF for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <script type="module" src="app.js"></script>
 </body>
+
 </html>
