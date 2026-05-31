@@ -194,7 +194,7 @@ onAuthStateChanged(auth, (user) => {
     if (adminBF) adminBF.style.display = isAdmin ? "block" : "none";
     document.querySelectorAll(".admin-col").forEach(c => c.style.display = isAdmin ? "table-cell" : "none");
     document.querySelectorAll(".note-col").forEach(c => c.style.display = isAdmin ? "table-cell" : "none");
-    document.querySelectorAll(".receipt-col").forEach(c => c.style.display = isAdmin ? "table-cell" : "none");
+    document.querySelectorAll(".receipt-col").forEach(c => c.style.display = "table-cell");
     render(globalData);
 });
 
@@ -464,7 +464,7 @@ function render(data) {
 function renderTable(tbodyId, rows, isFull = false) {
     const tbody = document.getElementById(tbodyId);
     if (!tbody) return;
-    const colspan = isAdmin ? 7 : 5;
+    const colspan = isAdmin ? 7 : 6;
 
     if (!rows.length) {
         tbody.innerHTML = `<tr><td colspan="${colspan}"><div class="empty-state"><div class="empty-state-icon">📭</div><div class="empty-state-text">কোনো তথ্য নেই।</div></div></td></tr>`;
@@ -476,9 +476,7 @@ function renderTable(tbodyId, rows, isFull = false) {
         const noteCell = hasNote
             ? `<td class="note-col"><button class="note-view-btn" data-id="${d.id}">📄 ভিউ</button></td>`
             : `<td class="note-col"><span class="no-note">—</span></td>`;
-        const receiptCell = isAdmin
-            ? `<td class="receipt-col"><button class="receipt-btn" data-id="${d.id}">🧾</button></td>`
-            : `<td class="receipt-col" style="display:none;"></td>`;
+        const receiptCell = `<td class="receipt-col"><button class="receipt-btn" data-id="${d.id}">🧾</button></td>`;
         return `<tr>
             <td>${d.name || "—"}</td>
             <td><strong>${fmtAmount(d.amount)}</strong></td>
@@ -509,7 +507,7 @@ function renderPaymentHistory(data) {
         <td><strong>${fmtAmount(d.amount)}</strong></td>
         <td>${fmtDate(d.date)}</td>
         <td>${getMethodBadge(d.category)}</td>
-        ${isAdmin ? `<td class="receipt-col"><button class="receipt-btn" data-id="${d.id}">🧾</button></td>` : `<td class="receipt-col" style="display:none;"></td>`}
+        <td class="receipt-col"><button class="receipt-btn" data-id="${d.id}">🧾</button></td>
         <td class="admin-col">
             <button class="del-btn" data-id="${d.id}">🗑️</button>
         </td>
@@ -610,8 +608,8 @@ function renderMembers() {
 
     // Grid columns — phone column conditionally include
     const gridCols = showPhoneCol
-        ? (isAdmin ? "44px 1fr 140px 100px 90px 1fr 80px" : "44px 1fr 140px 100px 90px 1fr")
-        : (isAdmin ? "44px 1fr 100px 90px 1fr 80px" : "44px 1fr 100px 90px 1fr");
+        ? (isAdmin ? "44px 1fr 140px 100px 90px 1fr 80px" : "44px 1fr 140px 100px 90px 1fr 80px")
+        : (isAdmin ? "44px 1fr 100px 90px 1fr 80px" : "44px 1fr 100px 90px 1fr 80px");
 
     const headerStyle = `display:grid;grid-template-columns:${gridCols};background:#1e293b;color:#f1f5f9;font-size:12px;font-weight:700;padding:10px 10px;gap:8px;align-items:center;border-radius:10px 10px 0 0;`;
     const rowStyle = `display:grid;grid-template-columns:${gridCols};padding:10px 10px;gap:8px;align-items:center;border-bottom:1px solid var(--border);font-size:13px;transition:background 0.15s;`;
@@ -1065,8 +1063,8 @@ function animateCount(id, target) {
 function updateAdminCols() {
     document.querySelectorAll(".admin-col").forEach(c => c.style.display = isAdmin ? "table-cell" : "none");
     document.querySelectorAll(".note-col").forEach(c => c.style.display = isAdmin ? "table-cell" : "none");
-    document.querySelectorAll(".receipt-col").forEach(c => c.style.display = isAdmin ? "table-cell" : "none");
-    document.querySelectorAll(".receipt-col").forEach(c => c.style.display = isAdmin ? "table-cell" : "none");
+    document.querySelectorAll(".receipt-col").forEach(c => c.style.display = "table-cell");
+    document.querySelectorAll(".receipt-col").forEach(c => c.style.display = "table-cell");
 }
 
 // ===== TABLE EVENTS =====
