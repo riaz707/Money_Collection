@@ -293,7 +293,7 @@ onSnapshot(collection(db, "members"), snap => {
     renderMembers();
 });
 
-// ===== SETTINGS SYNC (phoneVisible) =====
+// ===== SETTINGS SYNC (phoneVisible + receiptFormat) =====
 // Firestore থেকে real-time settings load — admin যা set করবে view mode-এও দেখাবে
 onSnapshot(doc(db, "settings", "appConfig"), (snap) => {
     if (snap.exists()) {
@@ -301,6 +301,15 @@ onSnapshot(doc(db, "settings", "appConfig"), (snap) => {
         if (typeof data.phoneVisible === "boolean" && data.phoneVisible !== phoneVisible) {
             phoneVisible = data.phoneVisible;
             renderMembers();
+        }
+        if (typeof data.receiptFormat === "string" && data.receiptFormat !== receiptFormat) {
+            receiptFormat = data.receiptFormat;
+            const pdfBtn = document.getElementById("receiptFormatPdfBtn");
+            const imgBtn = document.getElementById("receiptFormatImgBtn");
+            if (pdfBtn && imgBtn) {
+                pdfBtn.style.background = receiptFormat === "pdf" ? "#1a56db" : "#718096";
+                imgBtn.style.background = receiptFormat === "image" ? "#1a56db" : "#718096";
+            }
         }
     }
 });
@@ -583,6 +592,9 @@ async function fixAllMemberOrders() {
 // ===== PHONE VISIBILITY STATE =====
 let phoneVisible = false; // Admin toggle করে দেখাবে/লুকাবে
 
+// ===== RECEIPT FORMAT STATE =====
+let receiptFormat = "pdf"; // "pdf" বা "image" — Admin Firestore থেকে কন্ট্রোল করবে
+
 function renderMembers() {
     const el = document.getElementById("membersList");
     if (!el) return;
@@ -595,8 +607,11 @@ function renderMembers() {
     // Admin control bar
     let resetBtn = "";
     if (isAdmin) {
-        resetBtn = `<div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-bottom:10px;">
+        resetBtn = `<div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-bottom:10px;align-items:center;">
             <button id="togglePhoneBtn" style="background:${phoneVisible ? '#3182ce' : '#718096'};color:#fff;border:none;padding:6px 16px;border-radius:8px;cursor:pointer;font-size:13px;font-family:var(--font);font-weight:600;">${phoneVisible ? '🙈 নম্বর লুকান' : '👁️ নম্বর দেখান'}</button>
+            <span style="font-size:12px;color:#4a5568;font-family:var(--font);font-weight:600;">🧾 রিসিট ফরম্যাট:</span>
+            <button id="receiptFormatPdfBtn" style="background:${receiptFormat === 'pdf' ? '#1a56db' : '#718096'};color:#fff;border:none;padding:6px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-family:var(--font);font-weight:600;">📄 PDF</button>
+            <button id="receiptFormatImgBtn" style="background:${receiptFormat === 'image' ? '#1a56db' : '#718096'};color:#fff;border:none;padding:6px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-family:var(--font);font-weight:600;">🖼️ Image</button>
             <button id="fixOrderBtn" style="background:#38a169;color:#fff;border:none;padding:6px 16px;border-radius:8px;cursor:pointer;font-size:13px;font-family:var(--font);font-weight:600;">✅ SAVE</button>
         </div>`;
     }
@@ -751,6 +766,22 @@ function renderMembers() {
     // Phone toggle বাটন — onclick দিয়ে (re-render safe)
     const tBtn = document.getElementById("togglePhoneBtn");
     if (tBtn) tBtn.onclick = async () => { phoneVisible = !phoneVisible; try { await setDoc(doc(db, "settings", "appConfig"), { phoneVisible }, { merge: true }); } catch (e) { console.error("settings save error", e); } renderMembers(); };
+
+    // Receipt format বাটন — PDF বা Image
+    const rfPdfBtn = document.getElementById("receiptFormatPdfBtn");
+    if (rfPdfBtn) rfPdfBtn.onclick = async () => {
+        receiptFormat = "pdf";
+        try { await setDoc(doc(db, "settings", "appConfig"), { receiptFormat: "pdf" }, { merge: true }); } catch (e) { console.error("receipt format save error", e); }
+        renderMembers();
+        showMsg("🧾 রিসিট ফরম্যাট: PDF সেট করা হয়েছে।", "success");
+    };
+    const rfImgBtn = document.getElementById("receiptFormatImgBtn");
+    if (rfImgBtn) rfImgBtn.onclick = async () => {
+        receiptFormat = "image";
+        try { await setDoc(doc(db, "settings", "appConfig"), { receiptFormat: "image" }, { merge: true }); } catch (e) { console.error("receipt format save error", e); }
+        renderMembers();
+        showMsg("🧾 রিসিট ফরম্যাট: Image সেট করা হয়েছে।", "success");
+    };
 
     // ▲▼ ক্রম বাটন
     el.querySelectorAll(".order-up").forEach(btn => {
@@ -1308,11 +1339,24 @@ function exportSingleReceipt(item) {
     ctx.fillRect(0, 740, 600, 8);
 
     const imgData = canvas.toDataURL("image/png");
-    doc.addImage(imgData, "PNG", 0, 0, 80, 140);
 
-    const filename = `receipt-${item.name?.replace(/\s/g, "-") || "entry"}-${item.date || "date"}.pdf`;
-    doc.save(filename);
-    showMsg("🧾 রিসিট ডাউনলোড হচ্ছে!", "info");
+    const safeName = item.name?.replace(/\s/g, "-") || "entry";
+    const safeDate = item.date || "date";
+
+    if (receiptFormat === "image") {
+        // Image হিসেবে ডাউনলোড (PNG)
+        const link = document.createElement("a");
+        link.download = `receipt-${safeName}-${safeDate}.png`;
+        link.href = imgData;
+        link.click();
+        showMsg("🖼️ রিসিট Image ডাউনলোড হচ্ছে!", "info");
+    } else {
+        // PDF হিসেবে ডাউনলোড (default)
+        doc.addImage(imgData, "PNG", 0, 0, 80, 140);
+        const filename = `receipt-${safeName}-${safeDate}.pdf`;
+        doc.save(filename);
+        showMsg("🧾 রিসিট PDF ডাউনলোড হচ্ছে!", "info");
+    }
 }
 
 // ===== PDF EXPORT =====
