@@ -195,6 +195,9 @@ onAuthStateChanged(auth, (user) => {
     document.querySelectorAll(".admin-col").forEach(c => c.style.display = isAdmin ? "table-cell" : "none");
     document.querySelectorAll(".note-col").forEach(c => c.style.display = isAdmin ? "table-cell" : "none");
     document.querySelectorAll(".receipt-col").forEach(c => c.style.display = "table-cell");
+    document.querySelectorAll(".month-col").forEach(c => c.style.display = "table-cell");
+    document.querySelectorAll(".date-admin-col").forEach(c => c.style.display = "table-cell");
+    document.querySelectorAll(".submission-date-col").forEach(c => c.style.display = "table-cell");
     render(globalData);
 });
 
@@ -395,6 +398,25 @@ function fmtDate(dateStr) {
     return `${String(d.getDate()).padStart(2, "0")}-${String(d.getMonth() + 1).padStart(2, "0")}-${d.getFullYear()}`;
 }
 
+function getMonthName(dateStr) {
+    if (!dateStr) return "—";
+    const d = new Date(dateStr);
+    return d.toLocaleString("bn-BD", { year: "numeric", month: "long" });
+}
+
+function fmtSubmissionDate(timestamp) {
+    if (!timestamp) return "—";
+    let d;
+    if (timestamp?.seconds) {
+        d = new Date(timestamp.seconds * 1000);
+    } else if (timestamp instanceof Date) {
+        d = timestamp;
+    } else {
+        return "—";
+    }
+    return d.toLocaleString("bn-BD", { day: "2-digit", month: "2-digit", year: "numeric" });
+}
+
 function fmtAmount(n) {
     return `৳ ${Number(n).toLocaleString("bn-BD")}`;
 }
@@ -473,31 +495,63 @@ function render(data) {
 function renderTable(tbodyId, rows, isFull = false) {
     const tbody = document.getElementById(tbodyId);
     if (!tbody) return;
-    const colspan = isAdmin ? 7 : 6;
+    const colspan = isAdmin ? 10 : 7;
 
     if (!rows.length) {
         tbody.innerHTML = `<tr><td colspan="${colspan}"><div class="empty-state"><div class="empty-state-icon">📭</div><div class="empty-state-text">কোনো তথ্য নেই।</div></div></td></tr>`;
         return;
     }
 
-    tbody.innerHTML = rows.map(d => {
+    // তারিখ অনুযায়ী sort (নতুন আগে)
+    const sorted = [...rows].sort((a, b) => {
+        if (b.date !== a.date) return new Date(b.date) - new Date(a.date);
+        return (b.time?.seconds || 0) - (a.time?.seconds || 0);
+    });
+
+    tbody.innerHTML = sorted.map((d, idx) => {
         const hasNote = d.note?.trim();
         const noteCell = hasNote
             ? `<td class="note-col"><button class="note-view-btn" data-id="${d.id}">📄 ভিউ</button></td>`
             : `<td class="note-col"><span class="no-note">—</span></td>`;
         const receiptCell = `<td class="receipt-col"><button class="receipt-btn" data-id="${d.id}">🧾</button></td>`;
-        return `<tr>
-            <td>${d.name || "—"}</td>
-            <td><strong>${fmtAmount(d.amount)}</strong></td>
-            <td>${fmtDate(d.date)}</td>
-            <td>${getMethodBadge(d.category)}</td>
-            ${noteCell}
-            ${receiptCell}
-            <td class="admin-col">
-                <button class="edit-btn" data-id="${d.id}">✏️</button>
-                <button class="del-btn" data-id="${d.id}">🗑️</button>
-            </td>
-        </tr>`;
+        const monthName = getMonthName(d.date);
+        const serial = `<td style="text-align:center;font-weight:600;color:var(--text-secondary);font-size:13px;">${idx + 1}</td>`;
+
+        if (d.type === "income") {
+            // জমা: জমা দানের তারিখ (submission) + তারিখ (date) দুটোই দেখাবে
+            return `<tr>
+                ${serial}
+                <td>${d.name || "—"}</td>
+                <td><strong>${fmtAmount(d.amount)}</strong></td>
+                <td class="month-col">${monthName}</td>
+                <td class="submission-date-col">${fmtSubmissionDate(d.time)}</td>
+                <td class="date-admin-col">${fmtDate(d.date)}</td>
+                <td>${getMethodBadge(d.category)}</td>
+                ${noteCell}
+                ${receiptCell}
+                <td class="admin-col">
+                    <button class="edit-btn" data-id="${d.id}">✏️</button>
+                    <button class="del-btn" data-id="${d.id}">🗑️</button>
+                </td>
+            </tr>`;
+        } else {
+            // খরচ: খরচের তারিখ (date) + জমার তারিখ (submission) দুটোই দেখাবে
+            return `<tr>
+                ${serial}
+                <td>${d.name || "—"}</td>
+                <td><strong>${fmtAmount(d.amount)}</strong></td>
+                <td class="month-col">${monthName}</td>
+                <td class="submission-date-col">${fmtDate(d.date)}</td>
+                <td class="date-admin-col">${fmtSubmissionDate(d.time)}</td>
+                <td>${getMethodBadge(d.category)}</td>
+                ${noteCell}
+                ${receiptCell}
+                <td class="admin-col">
+                    <button class="edit-btn" data-id="${d.id}">✏️</button>
+                    <button class="del-btn" data-id="${d.id}">🗑️</button>
+                </td>
+            </tr>`;
+        }
     }).join("");
 
     attachTableEvents(tbody);
@@ -506,17 +560,21 @@ function renderTable(tbodyId, rows, isFull = false) {
 function renderPaymentHistory(data) {
     const tbody = document.getElementById("paymentHistory");
     if (!tbody) return;
-    const paid = data.filter(d => d.type === "income");
+    const paid = data.filter(d => d.type === "income").sort((a, b) => {
+        // জমা দানের তারিখ (submission time) অনুযায়ী sort — নতুন আগে
+        return (b.time?.seconds || 0) - (a.time?.seconds || 0);
+    });
     if (!paid.length) {
-        tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-state-icon">📭</div><div class="empty-state-text">কোনো পেমেন্ট নেই।</div></div></td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-state-icon">📭</div><div class="empty-state-text">কোনো পেমেন্ট নেই।</div></div></td></tr>`;
         return;
     }
-    tbody.innerHTML = paid.map(d => `<tr>
+    tbody.innerHTML = paid.map((d, i) => `<tr>
+        <td style="text-align:center;font-weight:600;color:var(--text-secondary);font-size:13px;">${i + 1}</td>
         <td>${d.name || "—"}</td>
         <td><strong>${fmtAmount(d.amount)}</strong></td>
-        <td>${fmtDate(d.date)}</td>
+        <td>${getMonthName(d.date)}</td>
+        <td>${fmtSubmissionDate(d.time)}</td>
         <td>${getMethodBadge(d.category)}</td>
-        <td class="receipt-col"><button class="receipt-btn" data-id="${d.id}">🧾</button></td>
         <td class="admin-col">
             <button class="del-btn" data-id="${d.id}">🗑️</button>
         </td>
@@ -1095,7 +1153,11 @@ function updateAdminCols() {
     document.querySelectorAll(".admin-col").forEach(c => c.style.display = isAdmin ? "table-cell" : "none");
     document.querySelectorAll(".note-col").forEach(c => c.style.display = isAdmin ? "table-cell" : "none");
     document.querySelectorAll(".receipt-col").forEach(c => c.style.display = "table-cell");
-    document.querySelectorAll(".receipt-col").forEach(c => c.style.display = "table-cell");
+    // month-col সবার জন্য দেখাবে
+    document.querySelectorAll(".month-col").forEach(c => c.style.display = "table-cell");
+    // দুটো তারিখ column-ই সবসময় দেখাবে (admin + non-admin)
+    document.querySelectorAll(".date-admin-col").forEach(c => c.style.display = "table-cell");
+    document.querySelectorAll(".submission-date-col").forEach(c => c.style.display = "table-cell");
 }
 
 // ===== TABLE EVENTS =====
@@ -1136,6 +1198,42 @@ function attachTableEvents(tbody) {
             document.getElementById("editType").value = item.type || "income";
             document.getElementById("editCategory").value = item.category || "other";
             document.getElementById("editNote").value = item.note || "";
+
+            // Submission date (time field) — edit করার জন্য
+            const submissionGroup = document.getElementById("editSubmissionDateGroup");
+            const submissionInput = document.getElementById("editSubmissionDate");
+            const dateLabel = document.getElementById("editDateLabel");
+            const submissionLabel = document.getElementById("editSubmissionDateLabel");
+
+            if (item.type === "income") {
+                dateLabel.textContent = "তারিখ";
+                submissionLabel.textContent = "জমা দানের তারিখ";
+                // submission date (time) থেকে date value বের করো
+                if (item.time?.seconds) {
+                    const d = new Date(item.time.seconds * 1000);
+                    const yyyy = d.getFullYear();
+                    const mm = String(d.getMonth() + 1).padStart(2, "0");
+                    const dd = String(d.getDate()).padStart(2, "0");
+                    submissionInput.value = `${yyyy}-${mm}-${dd}`;
+                } else {
+                    submissionInput.value = item.date || "";
+                }
+                submissionGroup.style.display = "block";
+            } else {
+                dateLabel.textContent = "খরচের তারিখ";
+                submissionLabel.textContent = "জমার তারিখ";
+                if (item.time?.seconds) {
+                    const d = new Date(item.time.seconds * 1000);
+                    const yyyy = d.getFullYear();
+                    const mm = String(d.getMonth() + 1).padStart(2, "0");
+                    const dd = String(d.getDate()).padStart(2, "0");
+                    submissionInput.value = `${yyyy}-${mm}-${dd}`;
+                } else {
+                    submissionInput.value = item.date || "";
+                }
+                submissionGroup.style.display = "block";
+            }
+
             document.getElementById("editModal").style.display = "flex";
         };
     });
@@ -1212,7 +1310,7 @@ function drawSignatures(ctx, canvasWidth, y) {
 function exportSingleReceipt(item) {
     // ===== HIGH-RES CANVAS (2x DPI for crisp PDF text) =====
     const CW = 900;   // canvas width  (printed as 80mm → ~2.25× upscale)
-    const CH = 1400;  // canvas height (printed as 140mm)
+    const CH = 1600;  // canvas height (printed as 160mm — 4 info rows)
     const canvas = document.createElement("canvas");
     canvas.width = CW;
     canvas.height = CH;
@@ -1324,7 +1422,8 @@ function exportSingleReceipt(item) {
     // ── Info cards ───────────────────────────────────────────
     const infoRows = [
         ["👤  নাম / বিবরণ", item.name || "—"],
-        ["📅  তারিখ", fmtDate(item.date)],
+        ["📆  মাস", getMonthName(item.date)],
+        ["📅  জমা দানের তারিখ", fmtSubmissionDate(item.time)],
         ["💳  পেমেন্ট মাধ্যম", getMethodLabel(item.category).replace(/📱|💵|🏦|📦/g, "").trim()],
     ];
 
@@ -1364,7 +1463,7 @@ function exportSingleReceipt(item) {
     });
 
     // ── Signatures ───────────────────────────────────────────
-    const sigY = 800;
+    const sigY = 900;
     drawSignatures(ctx, CW, sigY);
 
     // ── Footer band ──────────────────────────────────────────
@@ -1398,10 +1497,10 @@ function exportSingleReceipt(item) {
         link.click();
         showMsg("🖼️ রিসিট Image ডাউনলোড হচ্ছে!", "info");
     } else {
-        // PDF — 80×140mm, high-res canvas embedded
+        // PDF — 80×160mm
         const { jsPDF } = window.jspdf;
-        const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: [80, 140] });
-        doc.addImage(imgData, "PNG", 0, 0, 80, 140, undefined, "FAST");
+        const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: [80, 160] });
+        doc.addImage(imgData, "PNG", 0, 0, 80, 160, undefined, "FAST");
         doc.save(`receipt-${safeName}-${safeDate}.pdf`);
         showMsg("🧾 রিসিট PDF ডাউনলোড হচ্ছে!", "info");
     }
@@ -1434,12 +1533,14 @@ function exportToPDFWithBangla(rows, title, type) {
     const total = rows.reduce((s, r) => s + (r.amount || 0), 0);
     const dateStr = new Date().toLocaleDateString("bn-BD", { year: "numeric", month: "long", day: "numeric" });
 
-    const COL_W = [220, 130, 120, 140, 128];
+    const COL_W = [190, 110, 130, 130, 110, 100];
     const COL_X = COL_W.reduce((acc, w, i) => {
         acc.push(i === 0 ? MARGIN : acc[i - 1] + COL_W[i - 1]);
         return acc;
     }, []);
-    const HEADERS = ["নাম / বিবরণ", "টাকা", "তারিখ", "মাধ্যম", "ধরন"];
+    const HEADERS = isIncome
+        ? ["নাম / বিবরণ", "টাকা", "মাস", "জমার তারিখ", "মাধ্যম", "ধরন"]
+        : ["নাম / বিবরণ", "টাকা", "মাস", "খরচের তারিখ", "মাধ্যম", "ধরন"];
 
     const firstPageBodyH = LH - HDR_H - THDR_H - 40 - 60;
     const otherPageBodyH = LH - THDR_H - 40 - 60;
@@ -1583,10 +1684,12 @@ function exportToPDFWithBangla(rows, title, type) {
             });
 
             const amtColor = rowIsInc ? "#059669" : "#dc2626";
+            const dateVal = rowIsInc ? fmtSubmissionDate(d.time) : fmtDate(d.date);
             const cells = [
-                { text: (d.name || "—").substring(0, 26), color: "#0f172a", bold: true },
+                { text: (d.name || "—").substring(0, 22), color: "#0f172a", bold: true },
                 { text: `৳${Number(d.amount).toLocaleString("bn-BD")}`, color: amtColor, bold: true },
-                { text: fmtDate(d.date), color: "#475569", bold: false },
+                { text: getMonthName(d.date).substring(0, 14), color: "#475569", bold: false },
+                { text: dateVal, color: "#475569", bold: false },
                 { text: getMethodLabel(d.category).replace(/[📱💵🏦📦]/g, "").trim(), color: "#475569", bold: false },
                 { text: rowIsInc ? "জমা ↑" : "খরচ ↓", color: amtColor, bold: true },
             ];
@@ -1855,8 +1958,19 @@ document.getElementById("updateBtn").onclick = async () => {
     const type = document.getElementById("editType").value;
     const category = document.getElementById("editCategory").value;
     const note = document.getElementById("editNote").value.trim();
+    const submissionDateVal = document.getElementById("editSubmissionDate").value;
+
+    // submission date কে Firestore timestamp format এ রূপান্তর
+    let timeUpdate = {};
+    if (submissionDateVal) {
+        // date input থেকে সেই দিনের শুরু (00:00:00) নেওয়া হচ্ছে
+        const parts = submissionDateVal.split("-");
+        const submissionDateObj = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 0, 0, 0);
+        timeUpdate = { time: { seconds: Math.floor(submissionDateObj.getTime() / 1000), nanoseconds: 0 } };
+    }
+
     try {
-        await updateDoc(doc(db, "moneyList", currentEditId), { name, amount: Number(amount), date, type, category, note });
+        await updateDoc(doc(db, "moneyList", currentEditId), { name, amount: Number(amount), date, type, category, note, ...timeUpdate });
         document.getElementById("editModal").style.display = "none";
         addLog("✏️", `"${name}" আপডেট করা হয়েছে।`);
         showMsg("✅ আপডেট সফল!", "success");

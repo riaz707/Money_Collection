@@ -472,6 +472,8 @@ tbody tr:hover td { background: #ebf4ff !important; }
 [data-theme="dark"] tbody tr:hover td { background: #1a2744 !important; }
 
 .note-col, .admin-col, .receipt-col { display: none; }
+.month-col { display: table-cell; }
+.date-admin-col, .submission-date-col { display: none; }
 
 /* ===== STATUS BADGES ===== */
 .badge {
