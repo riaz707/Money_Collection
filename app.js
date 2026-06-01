@@ -338,7 +338,7 @@ document.getElementById("name")?.addEventListener("input", function () {
     if (member && (member.phone || member.messenger)) {
         const phone = member.phone || "";
         const messenger = member.messenger || "";
-        const previewMsg = encodeURIComponent(`আপনার পেমেন্ট এন্ট্রি করা হয়েছে।\nধন্যবাদ!`);
+        const previewMsg = encodeURIComponent(`আপনার পেমেন্ট এন্ট্রি করা হয়েছে।\nধন্যবাদ! 🎉`);
         const waLink = phone ? `https://wa.me/88${phone}?text=${previewMsg}` : "";
         const msgrLink = messenger ? `https://m.me/${messenger}?text=${previewMsg}` : (phone ? `https://m.me/88${phone}?text=${previewMsg}` : "");
         infoEl.innerHTML = `
@@ -705,11 +705,10 @@ function renderMembers() {
 
         const monthLabel = formatFilterMonthLabel(filterMonth);
         const reminderMsg = encodeURIComponent(`আসসালামুয়ালাইকুম ${m.name},
-আপনার ${monthLabel} মাসের পেমেন্ট বাকি আছে।
-অনুগ্রহ করে টাকা পাঠিয়ে দিন।
-ধন্যবাদ।`);
+আপনার ${monthLabel} মাসের ইয়ানতের পেমেন্ট বাকি আছে। অনুগ্রহ করে টাকা পাঠিয়ে দিন।
+ধন্যবাদ। ⚠️`);
         const paidMsg = encodeURIComponent(`আসসালামুয়ালাইকুম ${m.name},
-আপনার ${monthLabel} মাসের ৳${paid.toLocaleString("bn-BD")} পেমেন্ট পাওয়া গেছে। ধন্যবাদ! 🎉`);
+আপনার ${monthLabel} মাসের ইয়ানতের ৳${paid.toLocaleString("bn-BD")} পেমেন্ট পাওয়া গেছে। ধন্যবাদ! 🎉`);
         const waLink = phone ? `https://wa.me/88${phone}?text=${reminderMsg}` : "#";
         const waPaidLink = phone ? `https://wa.me/88${phone}?text=${paidMsg}` : "#";
         const msgrLink = messenger ? `https://m.me/${messenger}?text=${reminderMsg}` : (phone ? `https://m.me/88${phone}?text=${reminderMsg}` : "#");
@@ -1439,7 +1438,7 @@ function exportSingleReceipt(item) {
     // ── Thank-you message card ────────────────────────────────
     const msgBoxY = 860;
     const msgName = `${item.name || ""},`;
-    const msgBody = `আপনার ${getMonthName(item.date)} মাসের ৳${Number(item.amount).toLocaleString("bn-BD")} পেমেন্ট পাওয়া গেছে। ধন্যবাদ! 🌹`;
+    const msgBody = `আপনার ${getMonthName(item.date)} মাসের ইয়ানতের ৳${Number(item.amount).toLocaleString("bn-BD")} পেমেন্ট পাওয়া গেছে। ধন্যবাদ! 🎉`;
 
     // shadow
     ctx.fillStyle = "rgba(0,0,0,0.03)";
@@ -1832,7 +1831,7 @@ document.getElementById("printReport").onclick = () => window.print();
 // ===== WHATSAPP NOTIFICATION =====
 function showWhatsAppModal(entry) {
     const monthName = getMonthName(entry.date);
-    const msg = `আসসালামুয়ালাইকুম ${entry.name},\nআপনার ${monthName} মাসের ৳${Number(entry.amount).toLocaleString()} পেমেন্ট পাওয়া গেছে। ধন্যবাদ! 🌹`;
+    const msg = `আসসালামুয়ালাইকুম ${entry.name},\nআপনার ${monthName} মাসের ইয়ানতের ৳${Number(entry.amount).toLocaleString()} পেমেন্ট পাওয়া গেছে। ধন্যবাদ! 🎉`;
     document.getElementById("whatsappMsgPreview").textContent = msg;
     pendingEntryForWA = entry;
 
