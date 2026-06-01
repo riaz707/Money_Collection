@@ -404,6 +404,15 @@ function getMonthName(dateStr) {
     return d.toLocaleString("bn-BD", { year: "numeric", month: "long" });
 }
 
+// filterMonth (2026-05) → "মে - 2026" ফরম্যাটে রূপান্তর করে
+function formatFilterMonthLabel(filterMonth) {
+    if (!filterMonth) return "এই মাসের";
+    const [y, mo] = filterMonth.split("-").map(Number);
+    const d = new Date(y, mo - 1, 1);
+    const monthName = d.toLocaleString("bn-BD", { month: "long" });
+    return `${monthName} - ${y}`;
+}
+
 function fmtSubmissionDate(timestamp) {
     if (!timestamp) return "—";
     let d;
@@ -694,10 +703,13 @@ function renderMembers() {
         const phone = m.phone || "";
         const messenger = m.messenger || "";
 
-        // const reminderMsg = encodeURIComponent(`আসসালামুয়ালাইকুম ${m.name} ,\nআপনার ${filterMonth || "এই মাসের"} পেমেন্ট বাকি আছে।\nঅনুগ্রহ করে ৳${due.toLocaleString()} পাঠিয়ে দিন।\nধন্যবাদ।`);
-
-        const reminderMsg = encodeURIComponent(`আসসালামুয়ালাইকুম ${m.name},\nআপনার ${filterMonth || "এই মাসের"} মাসের পেমেন্ট বাকি আছে।\nঅনুগ্রহ করে টাকা পাঠিয়ে দিন।\nধন্যবাদ।`);
-        const paidMsg = encodeURIComponent(`আসসালামুয়ালাইকুম ${m.name},\nআপনার ${filterMonth || "এই মাসের"}  মাসের ৳${paid.toLocaleString()} পেমেন্ট পাওয়া গেছে। ধন্যবাদ! 🎉`);
+        const monthLabel = formatFilterMonthLabel(filterMonth);
+        const reminderMsg = encodeURIComponent(`আসসালামুয়ালাইকুম ${m.name},
+আপনার ${monthLabel} মাসের পেমেন্ট বাকি আছে।
+অনুগ্রহ করে টাকা পাঠিয়ে দিন।
+ধন্যবাদ।`);
+        const paidMsg = encodeURIComponent(`আসসালামুয়ালাইকুম ${m.name},
+আপনার ${monthLabel} মাসের ৳${paid.toLocaleString("bn-BD")} পেমেন্ট পাওয়া গেছে। ধন্যবাদ! 🎉`);
         const waLink = phone ? `https://wa.me/88${phone}?text=${reminderMsg}` : "#";
         const waPaidLink = phone ? `https://wa.me/88${phone}?text=${paidMsg}` : "#";
         const msgrLink = messenger ? `https://m.me/${messenger}?text=${reminderMsg}` : (phone ? `https://m.me/88${phone}?text=${reminderMsg}` : "#");
