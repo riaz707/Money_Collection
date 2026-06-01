@@ -193,11 +193,11 @@ onAuthStateChanged(auth, (user) => {
     const adminBF = document.getElementById("adminBudgetForm");
     if (adminBF) adminBF.style.display = isAdmin ? "block" : "none";
     document.querySelectorAll(".admin-col").forEach(c => c.style.display = isAdmin ? "table-cell" : "none");
-    document.querySelectorAll(".note-col").forEach(c => c.style.display = isAdmin ? "table-cell" : "none");
+    document.querySelectorAll(".note-col").forEach(c => c.style.display = "none");
     document.querySelectorAll(".receipt-col").forEach(c => c.style.display = "table-cell");
     document.querySelectorAll(".month-col").forEach(c => c.style.display = "table-cell");
-    document.querySelectorAll(".date-admin-col").forEach(c => c.style.display = "table-cell");
-    document.querySelectorAll(".submission-date-col").forEach(c => c.style.display = "table-cell");
+    document.querySelectorAll(".date-admin-col").forEach(c => c.style.display = "none");
+    document.querySelectorAll(".submission-date-col").forEach(c => c.style.display = isAdmin ? "table-cell" : "none");
     render(globalData);
 });
 
@@ -495,39 +495,27 @@ function render(data) {
 function renderTable(tbodyId, rows, isFull = false) {
     const tbody = document.getElementById(tbodyId);
     if (!tbody) return;
-    const colspan = isAdmin ? 10 : 7;
+    const colspan = isAdmin ? 7 : 5;
 
     if (!rows.length) {
         tbody.innerHTML = `<tr><td colspan="${colspan}"><div class="empty-state"><div class="empty-state-icon">📭</div><div class="empty-state-text">কোনো তথ্য নেই।</div></div></td></tr>`;
         return;
     }
 
-    // তারিখ অনুযায়ী sort (নতুন আগে)
-    const sorted = [...rows].sort((a, b) => {
-        if (b.date !== a.date) return new Date(b.date) - new Date(a.date);
-        return (b.time?.seconds || 0) - (a.time?.seconds || 0);
-    });
+    // income table নাকি expense table বের করো
+    const isIncome = rows.length > 0 && rows[0].type === "income";
 
-    tbody.innerHTML = sorted.map((d, idx) => {
-        const hasNote = d.note?.trim();
-        const noteCell = hasNote
-            ? `<td class="note-col"><button class="note-view-btn" data-id="${d.id}">📄 ভিউ</button></td>`
-            : `<td class="note-col"><span class="no-note">—</span></td>`;
+    tbody.innerHTML = rows.map(d => {
         const receiptCell = `<td class="receipt-col"><button class="receipt-btn" data-id="${d.id}">🧾</button></td>`;
         const monthName = getMonthName(d.date);
-        const serial = `<td style="text-align:center;font-weight:600;color:var(--text-secondary);font-size:13px;">${idx + 1}</td>`;
 
         if (d.type === "income") {
-            // জমা: জমা দানের তারিখ (submission) + তারিখ (date) দুটোই দেখাবে
             return `<tr>
-                ${serial}
                 <td>${d.name || "—"}</td>
                 <td><strong>${fmtAmount(d.amount)}</strong></td>
                 <td class="month-col">${monthName}</td>
                 <td class="submission-date-col">${fmtSubmissionDate(d.time)}</td>
-                <td class="date-admin-col">${fmtDate(d.date)}</td>
                 <td>${getMethodBadge(d.category)}</td>
-                ${noteCell}
                 ${receiptCell}
                 <td class="admin-col">
                     <button class="edit-btn" data-id="${d.id}">✏️</button>
@@ -535,16 +523,12 @@ function renderTable(tbodyId, rows, isFull = false) {
                 </td>
             </tr>`;
         } else {
-            // খরচ: খরচের তারিখ (date) + জমার তারিখ (submission) দুটোই দেখাবে
             return `<tr>
-                ${serial}
                 <td>${d.name || "—"}</td>
                 <td><strong>${fmtAmount(d.amount)}</strong></td>
                 <td class="month-col">${monthName}</td>
                 <td class="submission-date-col">${fmtDate(d.date)}</td>
-                <td class="date-admin-col">${fmtSubmissionDate(d.time)}</td>
                 <td>${getMethodBadge(d.category)}</td>
-                ${noteCell}
                 ${receiptCell}
                 <td class="admin-col">
                     <button class="edit-btn" data-id="${d.id}">✏️</button>
@@ -561,8 +545,9 @@ function renderPaymentHistory(data) {
     const tbody = document.getElementById("paymentHistory");
     if (!tbody) return;
     const paid = data.filter(d => d.type === "income").sort((a, b) => {
-        // জমা দানের তারিখ (submission time) অনুযায়ী sort — নতুন আগে
-        return (b.time?.seconds || 0) - (a.time?.seconds || 0);
+        const ta = a.time?.seconds || 0;
+        const tb = b.time?.seconds || 0;
+        return tb - ta;
     });
     if (!paid.length) {
         tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-state-icon">📭</div><div class="empty-state-text">কোনো পেমেন্ট নেই।</div></div></td></tr>`;
@@ -1151,13 +1136,13 @@ function animateCount(id, target) {
 // ===== ADMIN COL TOGGLE =====
 function updateAdminCols() {
     document.querySelectorAll(".admin-col").forEach(c => c.style.display = isAdmin ? "table-cell" : "none");
-    document.querySelectorAll(".note-col").forEach(c => c.style.display = isAdmin ? "table-cell" : "none");
+    document.querySelectorAll(".note-col").forEach(c => c.style.display = "none"); // note col সবার জন্য লুকানো
     document.querySelectorAll(".receipt-col").forEach(c => c.style.display = "table-cell");
     // month-col সবার জন্য দেখাবে
     document.querySelectorAll(".month-col").forEach(c => c.style.display = "table-cell");
-    // দুটো তারিখ column-ই সবসময় দেখাবে (admin + non-admin)
-    document.querySelectorAll(".date-admin-col").forEach(c => c.style.display = "table-cell");
-    document.querySelectorAll(".submission-date-col").forEach(c => c.style.display = "table-cell");
+    // submission-date-col শুধু admin দেখবে
+    document.querySelectorAll(".submission-date-col").forEach(c => c.style.display = isAdmin ? "table-cell" : "none");
+    document.querySelectorAll(".date-admin-col").forEach(c => c.style.display = "none");
 }
 
 // ===== TABLE EVENTS =====
@@ -1198,42 +1183,17 @@ function attachTableEvents(tbody) {
             document.getElementById("editType").value = item.type || "income";
             document.getElementById("editCategory").value = item.category || "other";
             document.getElementById("editNote").value = item.note || "";
-
-            // Submission date (time field) — edit করার জন্য
-            const submissionGroup = document.getElementById("editSubmissionDateGroup");
-            const submissionInput = document.getElementById("editSubmissionDate");
-            const dateLabel = document.getElementById("editDateLabel");
-            const submissionLabel = document.getElementById("editSubmissionDateLabel");
-
-            if (item.type === "income") {
-                dateLabel.textContent = "তারিখ";
-                submissionLabel.textContent = "জমা দানের তারিখ";
-                // submission date (time) থেকে date value বের করো
-                if (item.time?.seconds) {
-                    const d = new Date(item.time.seconds * 1000);
-                    const yyyy = d.getFullYear();
-                    const mm = String(d.getMonth() + 1).padStart(2, "0");
-                    const dd = String(d.getDate()).padStart(2, "0");
-                    submissionInput.value = `${yyyy}-${mm}-${dd}`;
-                } else {
-                    submissionInput.value = item.date || "";
-                }
-                submissionGroup.style.display = "block";
+            // submission date (time field) — datetime-local format এ সেট করো
+            if (item.time?.seconds) {
+                const d = new Date(item.time.seconds * 1000);
+                const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+                document.getElementById("editSubmissionDate").value = local;
             } else {
-                dateLabel.textContent = "খরচের তারিখ";
-                submissionLabel.textContent = "জমার তারিখ";
-                if (item.time?.seconds) {
-                    const d = new Date(item.time.seconds * 1000);
-                    const yyyy = d.getFullYear();
-                    const mm = String(d.getMonth() + 1).padStart(2, "0");
-                    const dd = String(d.getDate()).padStart(2, "0");
-                    submissionInput.value = `${yyyy}-${mm}-${dd}`;
-                } else {
-                    submissionInput.value = item.date || "";
-                }
-                submissionGroup.style.display = "block";
+                document.getElementById("editSubmissionDate").value = "";
             }
-
+            // label dynamically update করো type অনুযায়ী
+            const subLabel = document.querySelector('label[for="editSubmissionDate"]');
+            if (subLabel) subLabel.textContent = item.type === "income" ? "জমার তারিখ (এন্ট্রি তারিখ)" : "খরচের তারিখ (এন্ট্রি তারিখ)";
             document.getElementById("editModal").style.display = "flex";
         };
     });
@@ -1420,10 +1380,12 @@ function exportSingleReceipt(item) {
     ctx.fillText("✂", 30, 418);
 
     // ── Info cards ───────────────────────────────────────────
+    const dateLabel = isIncome ? "📅  জমার তারিখ" : "📅  খরচের তারিখ";
+    const dateValue = isIncome ? fmtSubmissionDate(item.time) : fmtDate(item.date);
     const infoRows = [
         ["👤  নাম / বিবরণ", item.name || "—"],
         ["📆  মাস", getMonthName(item.date)],
-        ["📅  জমা দানের তারিখ", fmtSubmissionDate(item.time)],
+        [dateLabel, dateValue],
         ["💳  পেমেন্ট মাধ্যম", getMethodLabel(item.category).replace(/📱|💵|🏦|📦/g, "").trim()],
     ];
 
@@ -1462,8 +1424,38 @@ function exportSingleReceipt(item) {
         ctx.fillText(row[1], 70, cy + 62);
     });
 
+    // ── Thank-you message card ────────────────────────────────
+    const msgBoxY = 860;
+    const msgName = `${item.name || ""},`;
+    const msgBody = `আপনার ${getMonthName(item.date)} মাসের ৳${Number(item.amount).toLocaleString("bn-BD")} পেমেন্ট পাওয়া গেছে। ধন্যবাদ! 🌹`;
+
+    // shadow
+    ctx.fillStyle = "rgba(0,0,0,0.03)";
+    ctx.beginPath(); ctx.roundRect(48, msgBoxY - 2, CW - 96, 110, 14); ctx.fill();
+    // bg gradient
+    const msgGrad = ctx.createLinearGradient(46, msgBoxY, CW - 46, msgBoxY + 108);
+    msgGrad.addColorStop(0, isIncome ? "#f0fdf4" : "#fff1f2");
+    msgGrad.addColorStop(1, isIncome ? "#dcfce7" : "#ffe4e6");
+    ctx.fillStyle = msgGrad;
+    ctx.beginPath(); ctx.roundRect(46, msgBoxY, CW - 92, 108, 14); ctx.fill();
+    ctx.strokeStyle = ACCENT + "55";
+    ctx.lineWidth = 1.5; ctx.stroke();
+    // left accent bar
+    ctx.fillStyle = ACCENT;
+    ctx.beginPath(); ctx.roundRect(46, msgBoxY, 6, 108, [14, 0, 0, 14]); ctx.fill();
+
+    // line 1 — name highlighted bold accent
+    ctx.textAlign = "left";
+    ctx.fillStyle = ACCENT;
+    ctx.font = `bold 26px ${FONT}`;
+    ctx.fillText(msgName, 70, msgBoxY + 38);
+    // line 2 — message body
+    ctx.fillStyle = "#1e293b";
+    ctx.font = `21px ${FONT}`;
+    ctx.fillText(msgBody, 70, msgBoxY + 76);
+
     // ── Signatures ───────────────────────────────────────────
-    const sigY = 900;
+    const sigY = 984;
     drawSignatures(ctx, CW, sigY);
 
     // ── Footer band ──────────────────────────────────────────
@@ -1827,7 +1819,8 @@ document.getElementById("printReport").onclick = () => window.print();
 
 // ===== WHATSAPP NOTIFICATION =====
 function showWhatsAppModal(entry) {
-    const msg = `🎉 নতুন পেমেন্ট হয়েছে!\n\nনাম: ${entry.name}\nটাকা: ৳${Number(entry.amount).toLocaleString()}\nমাধ্যম: ${getMethodLabel(entry.category)}\nতারিখ: ${entry.date}\n\nটাকা ম্যানেজার অ্যাপ`;
+    const monthName = getMonthName(entry.date);
+    const msg = `আসসালামুয়ালাইকুম ${entry.name},\nআপনার ${monthName} মাসের ৳${Number(entry.amount).toLocaleString()} পেমেন্ট পাওয়া গেছে। ধন্যবাদ! 🌹`;
     document.getElementById("whatsappMsgPreview").textContent = msg;
     pendingEntryForWA = entry;
 
@@ -1920,7 +1913,7 @@ function showMessengerModal(entry) {
     const member = membersData.find(m => m.name.trim().toLowerCase() === entry.name.toLowerCase());
     const messenger = member?.messenger || "";
     const phone = member?.phone || "";
-    const msg = `🎉 নতুন পেমেন্ট হয়েছে!\n\nনাম: ${entry.name}\nটাকা: ৳${Number(entry.amount).toLocaleString()}\nমাধ্যম: ${getMethodLabel(entry.category)}\nতারিখ: ${entry.date}\n\nটাকা ম্যানেজার অ্যাপ`;
+    const msg = `আসসালামুয়ালাইকুম ${entry.name},\nআপনার ${getMonthName(entry.date)} মাসের ৳${Number(entry.amount).toLocaleString()} পেমেন্ট পাওয়া গেছে। ধন্যবাদ! 🌹`;
 
     // Show preview in modal
     document.getElementById("messengerMsgPreview").textContent = msg;
@@ -1960,13 +1953,12 @@ document.getElementById("updateBtn").onclick = async () => {
     const note = document.getElementById("editNote").value.trim();
     const submissionDateVal = document.getElementById("editSubmissionDate").value;
 
-    // submission date কে Firestore timestamp format এ রূপান্তর
+    // submission date (time field) handle করো
     let timeUpdate = {};
     if (submissionDateVal) {
-        // date input থেকে সেই দিনের শুরু (00:00:00) নেওয়া হচ্ছে
-        const parts = submissionDateVal.split("-");
-        const submissionDateObj = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 0, 0, 0);
-        timeUpdate = { time: { seconds: Math.floor(submissionDateObj.getTime() / 1000), nanoseconds: 0 } };
+        const subDate = new Date(submissionDateVal);
+        // Firestore Timestamp-এর মতো seconds/nanoseconds object সংরক্ষণ করো
+        timeUpdate = { time: { seconds: Math.floor(subDate.getTime() / 1000), nanoseconds: 0 } };
     }
 
     try {

@@ -205,14 +205,11 @@
                         <table id="incomeTable">
                             <thead>
                                 <tr>
-                                    <th>#</th>
                                     <th>নাম</th>
                                     <th>টাকা</th>
                                     <th class="month-col">মাস</th>
-                                    <th class="submission-date-col">জমা দানের তারিখ</th>
-                                    <th class="date-admin-col">তারিখ</th>
+                                    <th class="submission-date-col">জমার তারিখ</th>
                                     <th>পেমেন্ট মাধ্যম</th>
-                                    <th class="note-col">নোট</th>
                                     <th class="receipt-col">রিসিট</th>
                                     <th class="admin-col">অ্যাকশন</th>
                                 </tr>
@@ -255,14 +252,11 @@
                         <table id="expenseTable">
                             <thead>
                                 <tr>
-                                    <th>#</th>
                                     <th>নাম</th>
                                     <th>টাকা</th>
                                     <th class="month-col">মাস</th>
                                     <th class="submission-date-col">খরচের তারিখ</th>
-                                    <th class="date-admin-col">জমার তারিখ</th>
                                     <th>পেমেন্ট মাধ্যম</th>
-                                    <th class="note-col">নোট</th>
                                     <th class="receipt-col">রিসিট</th>
                                     <th class="admin-col">অ্যাকশন</th>
                                 </tr>
@@ -302,14 +296,11 @@
                         <table>
                             <thead>
                                 <tr>
-                                    <th>#</th>
                                     <th>নাম</th>
                                     <th>টাকা</th>
                                     <th class="month-col">মাস</th>
-                                    <th class="submission-date-col">জমা দানের তারিখ</th>
-                                    <th class="date-admin-col">তারিখ</th>
+                                    <th class="submission-date-col">জমার তারিখ</th>
                                     <th>পেমেন্ট মাধ্যম</th>
-                                    <th class="note-col">নোট</th>
                                     <th class="receipt-col">রিসিট</th>
                                     <th class="admin-col">অ্যাকশন</th>
                                 </tr>
@@ -338,14 +329,11 @@
                         <table>
                             <thead>
                                 <tr>
-                                    <th>#</th>
                                     <th>নাম</th>
                                     <th>টাকা</th>
                                     <th class="month-col">মাস</th>
                                     <th class="submission-date-col">খরচের তারিখ</th>
-                                    <th class="date-admin-col">জমার তারিখ</th>
                                     <th>পেমেন্ট মাধ্যম</th>
-                                    <th class="note-col">নোট</th>
                                     <th class="receipt-col">রিসিট</th>
                                     <th class="admin-col">অ্যাকশন</th>
                                 </tr>
@@ -531,7 +519,7 @@
                                     <th>নাম</th>
                                     <th>টাকা</th>
                                     <th>মাস</th>
-                                    <th>জমা দানের তারিখ</th>
+                                    <th>জমা তারিখ</th>
                                     <th>মাধ্যম</th>
                                     <th class="admin-col">অ্যাকশন</th>
                                 </tr>
@@ -578,8 +566,8 @@
                 <div class="form-group"><label>নাম</label><input id="editName" placeholder="নাম"></div>
                 <div class="form-group"><label>টাকা</label><input id="editAmount" type="number" placeholder="টাকা">
                 </div>
-                <div class="form-group" id="editDateGroup"><label id="editDateLabel">তারিখ</label><input id="editDate" type="date"></div>
-                <div class="form-group" id="editSubmissionDateGroup"><label id="editSubmissionDateLabel">জমা দানের তারিখ</label><input id="editSubmissionDate" type="date"></div>
+                <div class="form-group"><label>তারিখ (জমা/খরচের তারিখ)</label><input id="editDate" type="date"></div>
+                <div class="form-group"><label for="editSubmissionDate">জমার/খরচের তারিখ (এন্ট্রি তারিখ)</label><input id="editSubmissionDate" type="datetime-local"></div>
                 <div class="form-group"><label>ধরন</label>
                     <select id="editType">
                         <option value="income">🟢 টাকা জমা</option>
