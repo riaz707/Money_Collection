@@ -7,6 +7,8 @@
     <title>টাকা ম্যানেজমেন্ট</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a56db">
+    <link rel="icon" href="icons/icon-192.png">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link
         href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Tiro+Bangla&display=swap"
@@ -669,6 +671,23 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <script type="module" src="app.js"></script>
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("sw.js").catch((err) => {
+            console.warn("Service worker registration failed:", err);
+          });
+        });
+        // When a new service worker activates after an update, reload once
+        // so the page picks up the fresh app shell automatically.
+        let hasReloaded = false;
+        navigator.serviceWorker.addEventListener("controllerchange", () => {
+          if (hasReloaded) return;
+          hasReloaded = true;
+          window.location.reload();
+        });
+      }
+    </script>
 </body>
 
 </html>
