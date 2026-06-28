@@ -5,8 +5,9 @@
 // SHELL (HTML/CSS/JS/images) so the app *opens* instantly and offline.
 // It does NOT cache Firestore reads/writes or the Firebase/Google Auth
 // network calls — those are left alone so Firestore's own SDK can manage
-// its own sync and offline persistence correctly. Mixing the two would
-// risk showing stale financial data as if it were current.
+// its own sync and offline persistence correctly (offline persistence is
+// enabled separately in app.js via initializeFirestore + persistentLocalCache).
+// Mixing the two would risk showing stale financial data as if it were current.
 //
 // Bump CACHE_VERSION whenever index.html/style.css/app.js/icons change
 // so returning visitors get the fresh shell instead of a stale one.
@@ -54,17 +55,13 @@ self.addEventListener("install", (event) => {
 // Activate: remove old caches from previous versions.
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches
-      .keys()
-      .then((keys) =>
-        Promise.all(
-          keys
-            .filter(
-              (key) => key.startsWith("taka-manager-") && key !== CACHE_NAME,
-            )
-            .map((key) => caches.delete(key)),
-        ),
+    caches.keys().then((keys) =>
+      Promise.all(
+        keys
+          .filter((key) => key.startsWith("taka-manager-") && key !== CACHE_NAME)
+          .map((key) => caches.delete(key)),
       ),
+    ),
   );
   self.clients.claim();
 });

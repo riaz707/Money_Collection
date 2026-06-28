@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc, setDoc, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { initializeFirestore, persistentLocalCache, persistentSingleTabManager, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc, setDoc, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 // ===== FIREBASE CONFIG =====
@@ -13,7 +13,11 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+// অফলাইন পার্সিস্টেন্স: শেষ সিঙ্ক হওয়া ডেটা IndexedDB-তে সেভ থাকে, নেট না
+// থাকলেও সেই কপি থেকেই দেখায়, নেট ফিরলে আবার অটো সিঙ্ক হয়ে যায়।
+const db = initializeFirestore(app, {
+    localCache: persistentLocalCache({ tabManager: persistentSingleTabManager({}) })
+});
 const auth = getAuth(app);
 
 // ===== STATE =====
@@ -65,6 +69,41 @@ function showMsg(text, type = "success") {
     t.className = `toast show ${type}`;
     setTimeout(() => { t.className = "toast"; }, 3200);
 }
+
+// ===== OFFLINE BANNER =====
+// নেট না থাকলে স্পষ্টভাবে জানিয়ে দেয় যে এখন যা দেখানো হচ্ছে তা সর্বশেষ
+// সিঙ্ক হওয়া (offline persistence cache থেকে) ডেটা — লাইভ ডেটা নয়।
+// banner.show হওয়ার ফলে topbar/modal যাতে এর নিচে চলে গিয়ে hamburger/login
+// বাটন না ঢেকে ফেলে, তাই body-তে একটা class বসিয়ে CSS variable দিয়ে আসল
+// height অনুযায়ী জায়গা ছেড়ে দেওয়া হয়।
+function updateOfflineBanner() {
+    const banner = document.getElementById("offlineBanner");
+    if (!banner) return;
+    if (navigator.onLine) {
+        banner.classList.remove("show");
+        document.body.classList.remove("offline-active");
+    } else {
+        banner.classList.add("show");
+        document.body.classList.add("offline-active");
+        // banner-টা ঠিকভাবে render হওয়ার পর তার আসল উচ্চতা মাপা হয়, যাতে
+        // ছোট স্ক্রিনে টেক্সট দুই লাইনে গেলেও topbar/modal ঠিকভাবে নিচে নামে
+        requestAnimationFrame(() => {
+            const h = banner.offsetHeight;
+            if (h > 0) {
+                document.documentElement.style.setProperty("--offline-banner-h", h + "px");
+            }
+        });
+    }
+}
+window.addEventListener("online", () => {
+    updateOfflineBanner();
+    showMsg("✅ ইন্টারনেট সংযোগ ফিরে এসেছে, সিঙ্ক হচ্ছে...", "success");
+});
+window.addEventListener("offline", () => {
+    updateOfflineBanner();
+    showMsg("📴 ইন্টারনেট সংযোগ নেই, অফলাইন মোডে চলছে", "error");
+});
+updateOfflineBanner();
 
 // ===== ACTIVITY LOG =====
 function addLog(icon, text) {

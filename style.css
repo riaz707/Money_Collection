@@ -898,6 +898,37 @@ tbody tr:hover td { background: #ebf4ff !important; }
 .confirm-icon { font-size: 42px; margin-bottom: 10px; }
 .confirm-box p { color: var(--text2); margin: 8px 0 4px; font-size: 14px; }
 
+/* ===== OFFLINE BANNER ===== */
+#offlineBanner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 10000;
+    background: #c05621;
+    color: #fff;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 12px;
+    transform: translateY(-100%);
+    transition: transform 0.3s ease;
+}
+#offlineBanner.show { transform: translateY(0); }
+
+/* যখন banner দেখানো হয়, topbar/sidebar/modal-কে নিচে ঠেলে দেয় যাতে banner-টা
+   hamburger/login বাটনের উপর ওভারল্যাপ করে সেগুলো ঢেকে না ফেলে। */
+body.offline-active .topbar {
+    top: var(--offline-banner-h, 36px);
+}
+body.offline-active .sidebar {
+    top: var(--offline-banner-h, 36px);
+    height: calc(100vh - var(--offline-banner-h, 36px));
+}
+body.offline-active .modal {
+    padding-top: var(--offline-banner-h, 36px);
+}
+
 /* ===== TOAST ===== */
 .toast {
     position: fixed;
